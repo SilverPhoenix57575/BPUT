@@ -1,13 +1,20 @@
 import { useState } from 'react'
-import { BookOpen, Upload, BarChart, Award, Home, Sparkles, Brain, Target, Zap, LogOut } from 'lucide-react'
+import { BookOpen, Upload, BarChart, Award, Home, Sparkles, Brain, Target, Zap, LogOut, GraduationCap } from 'lucide-react'
 import SignIn from './components/auth/SignIn'
 import SignUp from './components/auth/SignUp'
+import ContentUpload from './components/student/ContentUpload'
+import LearningInterface from './components/student/LearningInterface'
+import QuizView from './components/student/QuizView'
+import ProgressDashboard from './components/student/ProgressDashboard'
+import BadgeDisplay from './components/gamification/BadgeDisplay'
 import useUserStore from './stores/userStore'
+import useContentStore from './stores/contentStore'
 
 function App() {
   const [authView, setAuthView] = useState('signin')
   const { user, setUser, logout } = useUserStore()
   const [activeView, setActiveView] = useState('home')
+  const currentContent = useContentStore(state => state.currentContent)
 
   const handleSignIn = (credentials) => {
     setUser({ id: 'user_123', email: credentials.email, role: 'student' })
@@ -23,9 +30,25 @@ function App() {
       : <SignUp onSignUp={handleSignUp} onSwitchToSignIn={() => setAuthView('signin')} />
   }
 
+  const renderContent = () => {
+    switch(activeView) {
+      case 'upload':
+        return <ContentUpload />
+      case 'learn':
+        return <LearningInterface content={currentContent} />
+      case 'quiz':
+        return <QuizView contentId={currentContent?.id || 'demo'} competencyId="cs_001" />
+      case 'progress':
+        return <ProgressDashboard />
+      case 'badges':
+        return <BadgeDisplay />
+      default:
+        return <HomePage onNavigate={setActiveView} />
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      {/* Modern Navbar */}
       <nav className="bg-white/80 backdrop-blur-lg shadow-sm border-b border-gray-100 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-20">
@@ -44,6 +67,7 @@ function App() {
             <div className="flex items-center gap-2">
               <NavButton icon={Home} label="Home" active={activeView === 'home'} onClick={() => setActiveView('home')} />
               <NavButton icon={Upload} label="Upload" active={activeView === 'upload'} onClick={() => setActiveView('upload')} />
+              <NavButton icon={GraduationCap} label="Learn" active={activeView === 'learn'} onClick={() => setActiveView('learn')} />
               <NavButton icon={BarChart} label="Progress" active={activeView === 'progress'} onClick={() => setActiveView('progress')} />
               <NavButton icon={Award} label="Badges" active={activeView === 'badges'} onClick={() => setActiveView('badges')} />
               <button
@@ -58,80 +82,74 @@ function App() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <main className="py-12">
-        <div className="max-w-6xl mx-auto px-6">
-          {/* Header */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-              <Sparkles size={16} />
-              <span>Powered by AI & Cognitive Science</span>
-            </div>
-            <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Learn Smarter, Not Harder
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Your personal AI learning assistant that adapts to your cognitive state, 
-              works offline, and maps your skills to real careers.
-            </p>
-          </div>
-
-          {/* Feature Cards */}
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
-            <FeatureCard
-              icon={Brain}
-              title="Adaptive Learning"
-              description="BKT algorithm personalizes your learning path based on mastery"
-              gradient="from-blue-500 to-cyan-500"
-            />
-            <FeatureCard
-              icon={Zap}
-              title="Works Offline"
-              description="Learn anywhere with offline-first architecture and sync"
-              gradient="from-purple-500 to-pink-500"
-            />
-            <FeatureCard
-              icon={Target}
-              title="Career Mapping"
-              description="See how your skills match real job requirements"
-              gradient="from-orange-500 to-red-500"
-            />
-          </div>
-
-          {/* Action Cards */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <ActionCard
-              icon={Upload}
-              title="Upload Content"
-              description="PDF, Documents, Images, YouTube - we handle it all"
-              gradient="from-blue-600 to-blue-700"
-              onClick={() => setActiveView('upload')}
-            />
-            <ActionCard
-              icon={BarChart}
-              title="Track Progress"
-              description="Visualize your mastery across all competencies"
-              gradient="from-green-600 to-emerald-700"
-              onClick={() => setActiveView('progress')}
-            />
-          </div>
-
-          {/* Stats */}
-          <div className="mt-16 grid grid-cols-4 gap-6">
-            <StatCard number="5+" label="CS Topics" />
-            <StatCard number="100%" label="Offline Ready" />
-            <StatCard number="AI" label="Powered" />
-            <StatCard number="∞" label="Possibilities" />
-          </div>
-        </div>
+      <main className="py-8">
+        {renderContent()}
       </main>
+    </div>
+  )
+}
 
-      {/* Footer */}
-      <footer className="mt-20 py-8 border-t border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 text-center text-gray-500 text-sm">
-          <p>Built with ❤️ for BPUT Hackathon • Offline-First • Privacy-First • Student-First</p>
+function HomePage({ onNavigate }) {
+  return (
+    <div className="max-w-6xl mx-auto px-6">
+      <div className="text-center mb-16">
+        <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+          <Sparkles size={16} />
+          <span>Powered by AI & Cognitive Science</span>
         </div>
-      </footer>
+        <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          Learn Smarter, Not Harder
+        </h1>
+        <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          Your personal AI learning assistant that adapts to your cognitive state, 
+          works offline, and maps your skills to real careers.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <FeatureCard
+          icon={Brain}
+          title="Adaptive Learning"
+          description="BKT algorithm personalizes your learning path based on mastery"
+          gradient="from-blue-500 to-cyan-500"
+        />
+        <FeatureCard
+          icon={Zap}
+          title="Works Offline"
+          description="Learn anywhere with offline-first architecture and sync"
+          gradient="from-purple-500 to-pink-500"
+        />
+        <FeatureCard
+          icon={Target}
+          title="Career Mapping"
+          description="See how your skills match real job requirements"
+          gradient="from-orange-500 to-red-500"
+        />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <ActionCard
+          icon={Upload}
+          title="Upload Content"
+          description="PDF, Documents, Images, YouTube - we handle it all"
+          gradient="from-blue-600 to-blue-700"
+          onClick={() => onNavigate('upload')}
+        />
+        <ActionCard
+          icon={BarChart}
+          title="Track Progress"
+          description="Visualize your mastery across all competencies"
+          gradient="from-green-600 to-emerald-700"
+          onClick={() => onNavigate('progress')}
+        />
+      </div>
+
+      <div className="mt-16 grid grid-cols-4 gap-6">
+        <StatCard number="5+" label="CS Topics" />
+        <StatCard number="100%" label="Offline Ready" />
+        <StatCard number="AI" label="Powered" />
+        <StatCard number="∞" label="Possibilities" />
+      </div>
     </div>
   )
 }

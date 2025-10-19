@@ -1,85 +1,169 @@
-import { useState, useEffect } from 'react'
-import { aiAPI, progressAPI } from '../../services/api'
-import bkt from '../../services/bkt'
+import { useState } from 'react'
+import { CheckCircle, XCircle, Award, ArrowRight } from 'lucide-react'
 import useProgressStore from '../../stores/progressStore'
 
+const demoQuiz = {
+  questions: [
+    {
+      id: 'q1',
+      question: 'What is a variable in programming?',
+      options: [
+        'A container for storing data values',
+        'A type of loop',
+        'A function that returns nothing',
+        'A programming language'
+      ],
+      correctAnswer: 0,
+      explanation: 'A variable is a container for storing data values. It has a name and can hold different types of data like numbers, strings, or objects.'
+    },
+    {
+      id: 'q2',
+      question: 'Which of these is a valid variable name in most programming languages?',
+      options: [
+        '123variable',
+        'my-variable',
+        'myVariable',
+        'my variable'
+      ],
+      correctAnswer: 2,
+      explanation: 'myVariable is valid because it starts with a letter and uses camelCase. Variable names cannot start with numbers or contain spaces/hyphens.'
+    },
+    {
+      id: 'q3',
+      question: 'What does "const" mean when declaring a variable?',
+      options: [
+        'The variable can be changed anytime',
+        'The variable cannot be reassigned',
+        'The variable is temporary',
+        'The variable is global'
+      ],
+      correctAnswer: 1,
+      explanation: 'const means the variable cannot be reassigned after its initial value is set. It creates a constant reference.'
+    }
+  ]
+}
+
 export default function QuizView({ contentId, competencyId }) {
-  const [quiz, setQuiz] = useState(null)
   const [currentQ, setCurrentQ] = useState(0)
   const [selected, setSelected] = useState(null)
   const [showResult, setShowResult] = useState(false)
-  const [interactions, setInteractions] = useState([])
+  const [score, setScore] = useState(0)
+  const [completed, setCompleted] = useState(false)
   const updateMastery = useProgressStore(state => state.updateMastery)
 
-  useEffect(() => {
-    loadQuiz()
-  }, [contentId, competencyId])
-
-  const loadQuiz = async () => {
-    try {
-      const response = await aiAPI.quiz(contentId, competencyId, 5)
-      setQuiz(response.data)
-    } catch (error) {
-      console.error('Quiz load error:', error)
-    }
-  }
+  const question = demoQuiz.questions[currentQ]
 
   const handleAnswer = () => {
-    const correct = selected === quiz.questions[currentQ].correctAnswer
-    const newInteraction = { questionId: quiz.questions[currentQ].id, correct, timeSpent: 30 }
-    const newInteractions = [...interactions, newInteraction]
-    setInteractions(newInteractions)
+    const correct = selected === question.correctAnswer
+    if (correct) setScore(prev => prev + 1)
     setShowResult(true)
-
-    if (currentQ === quiz.questions.length - 1) {
-      const mastery = bkt.getMasteryLevel(newInteractions)
-      updateMastery(competencyId, mastery)
-      progressAPI.save('user_123', competencyId, newInteractions)
-    }
   }
 
   const nextQuestion = () => {
-    setCurrentQ(prev => prev + 1)
-    setSelected(null)
-    setShowResult(false)
+    if (currentQ === demoQuiz.questions.length - 1) {
+      const mastery = score / demoQuiz.questions.length
+      updateMastery(competencyId, mastery)
+      setCompleted(true)
+    } else {
+      setCurrentQ(prev => prev + 1)
+      setSelected(null)
+      setShowResult(false)
+    }
   }
 
-  if (!quiz) return <div>Loading quiz...</div>
-
-  const question = quiz.questions[currentQ]
+  if (completed) {
+    const percentage = Math.round((score / demoQuiz.questions.length) * 100)
+    return (
+      <div className="max-w-3xl mx-auto p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
+          <Award className={`mx-auto mb-6 ${percentage >= 70 ? 'text-green-500' : 'text-yellow-500'}`} size={80} />
+          <h2 className="text-4xl font-bold mb-4">Quiz Complete!</h2>
+          <div className="text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            {percentage}%
+          </div>
+          <p className="text-xl text-gray-600 mb-8">
+            You got {score} out of {demoQuiz.questions.length} questions correct
+          </p>
+          {percentage >= 70 ? (
+            <div className="bg-green-100 text-green-800 px-6 py-3 rounded-xl inline-block font-semibold">
+              ✓ Great job! Keep learning!
+            </div>
+          ) : (
+            <div className="bg-yellow-100 text-yellow-800 px-6 py-3 rounded-xl inline-block font-semibold">
+              Keep practicing to improve!
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="mb-4">
-          <span className="text-sm text-gray-600">Question {currentQ + 1} of {quiz.questions.length}</span>
+    <div className="max-w-3xl mx-auto p-6">
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          Knowledge Check
+        </h2>
+        <p className="text-gray-600">Test your understanding of {competencyId}</p>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div className="flex justify-between items-center mb-6">
+          <span className="text-sm font-semibold text-gray-500">
+            Question {currentQ + 1} of {demoQuiz.questions.length}
+          </span>
+          <div className="flex gap-2">
+            {demoQuiz.questions.map((_, idx) => (
+              <div
+                key={idx}
+                className={`w-2 h-2 rounded-full ${
+                  idx < currentQ ? 'bg-green-500' :
+                  idx === currentQ ? 'bg-blue-600' : 'bg-gray-300'
+                }`}
+              />
+            ))}
+          </div>
         </div>
 
-        <h3 className="text-xl font-bold mb-6">{question.question}</h3>
+        <h3 className="text-2xl font-bold mb-8">{question.question}</h3>
 
-        <div className="space-y-3 mb-6">
+        <div className="space-y-3 mb-8">
           {question.options.map((option, idx) => (
             <button
               key={idx}
               onClick={() => !showResult && setSelected(idx)}
-              className={`w-full text-left p-4 border-2 rounded-lg transition ${
-                selected === idx ? 'border-blue-600 bg-blue-50' : 'border-gray-300'
-              } ${showResult && idx === question.correctAnswer ? 'border-green-600 bg-green-50' : ''}`}
               disabled={showResult}
+              className={`w-full text-left p-5 border-2 rounded-xl transition-all ${
+                selected === idx && !showResult ? 'border-blue-600 bg-blue-50' :
+                showResult && idx === question.correctAnswer ? 'border-green-600 bg-green-50' :
+                showResult && selected === idx && idx !== question.correctAnswer ? 'border-red-600 bg-red-50' :
+                'border-gray-200 hover:border-gray-300'
+              }`}
             >
-              {option}
+              <div className="flex items-center gap-3">
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                  selected === idx && !showResult ? 'border-blue-600 bg-blue-600' :
+                  showResult && idx === question.correctAnswer ? 'border-green-600 bg-green-600' :
+                  showResult && selected === idx ? 'border-red-600 bg-red-600' :
+                  'border-gray-300'
+                }`}>
+                  {showResult && idx === question.correctAnswer && <CheckCircle className="text-white" size={16} />}
+                  {showResult && selected === idx && idx !== question.correctAnswer && <XCircle className="text-white" size={16} />}
+                </div>
+                <span className="font-medium">{option}</span>
+              </div>
             </button>
           ))}
         </div>
 
         {showResult && (
-          <div className={`p-4 rounded-lg mb-4 ${
-            selected === question.correctAnswer ? 'bg-green-100' : 'bg-red-100'
+          <div className={`p-6 rounded-xl mb-6 ${
+            selected === question.correctAnswer ? 'bg-green-100 border-2 border-green-300' : 'bg-red-100 border-2 border-red-300'
           }`}>
-            <p className="font-semibold mb-2">
+            <p className="font-bold text-lg mb-2">
               {selected === question.correctAnswer ? '✓ Correct!' : '✗ Incorrect'}
             </p>
-            <p className="text-sm">{question.explanation}</p>
+            <p className="text-sm leading-relaxed">{question.explanation}</p>
           </div>
         )}
 
@@ -88,19 +172,18 @@ export default function QuizView({ contentId, competencyId }) {
             <button
               onClick={handleAnswer}
               disabled={selected === null}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               Submit Answer
             </button>
-          ) : currentQ < quiz.questions.length - 1 ? (
+          ) : (
             <button
               onClick={nextQuestion}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
             >
-              Next Question
+              {currentQ === demoQuiz.questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
+              <ArrowRight size={20} />
             </button>
-          ) : (
-            <div className="text-green-600 font-semibold">Quiz Complete!</div>
           )}
         </div>
       </div>

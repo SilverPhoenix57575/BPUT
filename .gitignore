@@ -1,0 +1,211 @@
+# ============================================
+# AI Learning Platform - Complete .gitignore
+# ============================================
+
+# ==================== SECRETS & ENV ====================
+# CRITICAL: Never commit API keys or credentials
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+*.env
+**/.env
+**/config/secrets.json
+**/config/credentials.json
+
+# API Keys (extra protection)
+**/GEMINI_API_KEY*
+**/api-keys*
+**/secrets*
+
+# ==================== FRONTEND (Dev 1) ====================
+
+# Dependencies
+frontend/node_modules/
+frontend/package-lock.json
+frontend/yarn.lock
+frontend/pnpm-lock.yaml
+
+# Build outputs
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/.cache/
+
+# Vite
+frontend/.vite-cache/
+frontend/vite.config.js.timestamp-*
+
+# Testing
+frontend/coverage/
+frontend/.nyc_output/
+
+# IDE
+frontend/.vscode/
+frontend/.idea/
+frontend/*.swp
+frontend/*.swo
+frontend/*~
+
+# OS
+frontend/.DS_Store
+frontend/Thumbs.db
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/lerna-debug.log*
+
+# Local databases (PouchDB)
+frontend/src/db/
+frontend/indexeddb/
+
+# Service Worker cache
+frontend/public/sw.js.map
+frontend/public/workbox-*.js
+
+# ==================== BACKEND (Dev 2) ====================
+
+# Python virtual environment
+backend/venv/
+backend/env/
+backend/.venv/
+backend/.env/
+backend/ENV/
+backend/env.bak/
+backend/venv.bak/
+
+# Python cache
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.dmypy.json
+backend/dmypy.json
+
+# Python distribution
+backend/*.egg-info/
+backend/dist/
+backend/build/
+backend/eggs/
+backend/.eggs/
+backend/lib/
+backend/lib64/
+backend/parts/
+backend/sdist/
+backend/var/
+backend/wheels/
+backend/pip-wheel-metadata/
+backend/share/python-wheels/
+
+# Database files
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+backend/app.db
+backend/database.db
+
+# Uploaded files (temporary)
+backend/uploads/
+backend/temp/
+backend/tmp/
+
+# Tesseract temp files
+backend/tesseract_temp/
+
+# Logs
+backend/*.log
+backend/logs/
+backend/app.log
+
+# IDE
+backend/.vscode/
+backend/.idea/
+backend/*.swp
+backend/*.swo
+backend/*~
+
+# OS
+backend/.DS_Store
+backend/Thumbs.db
+
+# ==================== SHARED ====================
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+
+# Jupyter Notebooks (if used for testing)
+.ipynb_checkpoints/
+*.ipynb
+
+# ==================== DEPLOYMENT ====================
+
+# Vercel
+.vercel/
+.vercel
+
+# Render
+.render/
+
+# Docker (if used)
+docker-compose.override.yml
+.dockerignore
+
+# ==================== TESTING ====================
+
+# Test coverage
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# ==================== MISC ====================
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Compressed files
+*.zip
+*.tar.gz
+*.rar
+
+# Large model files (if any)
+*.onnx
+*.pb
+*.h5
+*.pth
+*.pt
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+.tmp/
+
+# Lock files (keep only one per project)
+*.lock
+
+# ==================== CLOUDANT/COUCHDB ====================
+# Local CouchDB data (if running locally)
+couchdb/data/
+couchdb/logs/
+
+# ==================== MEDIA FILES ====================
+# User uploaded content (should be in cloud storage)
+uploads/
+media/
+static/uploads/
+
+# ==================== NOTES ====================
+# Personal developer notes
+NOTES.md
+TODO_PERSONAL.md
+SCRATCH.md

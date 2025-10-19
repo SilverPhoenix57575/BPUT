@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { Upload, FileText, Image, Youtube, CheckCircle } from 'lucide-react'
+import { Upload, FileText, Image, Youtube, CheckCircle, AlertCircle } from 'lucide-react'
 import { contentAPI } from '../../services/api'
 import storage from '../../services/storage'
 import useContentStore from '../../stores/contentStore'
+import useUserStore from '../../stores/userStore'
 
 export default function ContentUpload() {
   const [uploading, setUploading] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
   const addContent = useContentStore(state => state.addContent)
+  const user = useUserStore(state => state.user)
 
   const handleFileUpload = async (e) => {
     const file = e.target.files[0]
@@ -15,8 +18,26 @@ export default function ContentUpload() {
 
     setUploading(true)
     setSuccess(false)
+    setError('')
+
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('userId', user?.id || 'user_123')
 
     try {
+      // Try backend first
+      const response = await contentAPI.upload(formData)
+      const content = response.data
+      
+      // Save to localStorage as backup
+      storage.saveContent(content)
+      addContent(content)
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
+    } catch (err) {
+      console.error('Backend upload failed, saving locally:', err)
+      
+      // Fallback to localStorage if backend fails
       const content = {
         id: 'content_' + Date.now(),
         filename: file.name,
@@ -28,9 +49,11 @@ export default function ContentUpload() {
       storage.saveContent(content)
       addContent(content)
       setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
-    } catch (error) {
-      console.error('Upload error:', error)
+      setError('Saved locally (backend unavailable)')
+      setTimeout(() => {
+        setSuccess(false)
+        setError('')
+      }, 3000)
     } finally {
       setUploading(false)
     }
@@ -69,6 +92,13 @@ export default function ContentUpload() {
           <div className="mt-4 inline-flex items-center gap-2 text-green-600 font-semibold">
             <CheckCircle size={20} />
             <span>File uploaded successfully!</span>
+          </div>
+        )}
+
+        {error && (
+          <div className="mt-4 inline-flex items-center gap-2 text-yellow-600 font-semibold">
+            <AlertCircle size={20} />
+            <span>{error}</span>
           </div>
         )}
       </div>

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Send, BookOpen, MessageCircle, Sparkles } from 'lucide-react'
+import { aiAPI } from '../../services/api'
+import useUserStore from '../../stores/userStore'
 
 export default function LearningInterface({ content }) {
   const [question, setQuestion] = useState('')
@@ -7,24 +9,40 @@ export default function LearningInterface({ content }) {
     { role: 'assistant', content: 'Hi! I\'m your AI learning assistant. Ask me anything about your content!' }
   ])
   const [loading, setLoading] = useState(false)
+  const user = useUserStore(state => state.user)
 
   const handleAskQuestion = async () => {
     if (!question.trim()) return
 
     const userMessage = { role: 'user', content: question }
     setMessages(prev => [...prev, userMessage])
+    const currentQuestion = question
     setQuestion('')
     setLoading(true)
 
-    setTimeout(() => {
+    try {
+      // Call backend AI API
+      const response = await aiAPI.question(currentQuestion, content?.id || 'demo', user?.id || 'user_123')
+      
       const aiMessage = { 
         role: 'assistant', 
-        content: `Great question! "${question}" - This is a demo response. In production, this would be powered by Gemini API with source-grounded answers and citations.`,
+        content: response.data.answer,
+        citations: response.data.citations 
+      }
+      setMessages(prev => [...prev, aiMessage])
+    } catch (error) {
+      console.error('AI API error:', error)
+      
+      // Fallback to demo response
+      const aiMessage = { 
+        role: 'assistant', 
+        content: `I understand you're asking about "${currentQuestion}". This is a demo response since the backend is unavailable. In production, this would be powered by Gemini API with source-grounded answers.`,
         citations: [{ source: 'Demo Content', page: 1 }]
       }
       setMessages(prev => [...prev, aiMessage])
+    } finally {
       setLoading(false)
-    }, 1000)
+    }
   }
 
   return (

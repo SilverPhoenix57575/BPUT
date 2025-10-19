@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Upload, FileText, Image, Youtube, CheckCircle } from 'lucide-react'
 import { contentAPI } from '../../services/api'
-import offlineStorage from '../../services/pouchdb'
+import storage from '../../services/storage'
 import useContentStore from '../../stores/contentStore'
 
 export default function ContentUpload() {
@@ -25,7 +25,7 @@ export default function ContentUpload() {
         timestamp: new Date().toISOString()
       }
       
-      await offlineStorage.saveContent(content)
+      storage.saveContent(content)
       addContent(content)
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)

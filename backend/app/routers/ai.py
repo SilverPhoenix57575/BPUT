@@ -1,54 +1,75 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from ..services.ai_service import AIService
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 ai_service = AIService()
 
 class EnhanceRequest(BaseModel):
-    text: str
-    level: str = "beginner"
+    text: str = Field(..., min_length=10, max_length=10000)
+    level: str = Field(default="beginner", pattern="^(beginner|intermediate|advanced)$")
 
 class QuestionRequest(BaseModel):
-    question: str
+    question: str = Field(..., min_length=3, max_length=500)
     contentId: str = None
     userId: str = "default_user"
 
 class QuizRequest(BaseModel):
     contentId: str
     competencyId: str
-    numQuestions: int = 5
+    numQuestions: int = Field(default=5, ge=1, le=20)
 
 @router.post("/enhance")
 async def enhance_content(request: EnhanceRequest):
     try:
+        logger.info(f"Enhancing content for level: {request.level}")
         enhanced = await ai_service.enhance_content(request.text, request.level)
+        logger.info("Content enhanced successfully")
         return {
             "enhancedText": enhanced,
             "readabilityScore": 8.5
         }
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Invalid input: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Enhancement error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to enhance content. Please try again.")
 
 @router.post("/question")
 async def ask_question(request: QuestionRequest):
     try:
+        logger.info(f"Processing question for user: {request.userId}")
         answer = await ai_service.answer_question(request.question, request.contentId)
+        logger.info("Question answered successfully")
         return {
             "answer": answer,
             "citations": [],
             "confidence": 0.92
         }
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Invalid question: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Question answering error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to answer question. Please try again.")
 
 @router.post("/quiz")
 async def generate_quiz(request: QuizRequest):
     try:
+        logger.info(f"Generating {request.numQuestions} questions for competency: {request.competencyId}")
         questions = await ai_service.generate_quiz(request.contentId, request.numQuestions)
+        logger.info("Quiz generated successfully")
         return {"questions": questions}
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Invalid quiz request: {str(e)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Quiz generation error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to generate quiz. Please try again.")
 
 @router.post("/feedback")
 async def generate_feedback(answer: str, question: str):

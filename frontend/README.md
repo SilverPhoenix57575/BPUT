@@ -45,8 +45,6 @@ Visit http://localhost:5173
 Edit `.env`:
 ```
 VITE_API_URL=http://localhost:8000
-VITE_COUCHDB_URL=your_cloudant_url
-VITE_GEMINI_API_KEY=your_api_key
 ```
 
 ## 📁 Structure

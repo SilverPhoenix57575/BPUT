@@ -35,7 +35,7 @@
 
 ### Offline-First ✅
 - PouchDB local storage
-- CouchDB sync capability
+- Backend API integration
 - Offline indicator
 - Works without internet
 

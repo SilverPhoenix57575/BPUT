@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { CheckCircle, XCircle, Award, ArrowRight } from 'lucide-react'
+import storage from '../../services/storage'
 import useProgressStore from '../../stores/progressStore'
+import useUserStore from '../../stores/userStore'
 
 const demoQuiz = {
   questions: [
@@ -50,6 +52,7 @@ export default function QuizView({ contentId, competencyId }) {
   const [score, setScore] = useState(0)
   const [completed, setCompleted] = useState(false)
   const updateMastery = useProgressStore(state => state.updateMastery)
+  const user = useUserStore(state => state.user)
 
   const question = demoQuiz.questions[currentQ]
 
@@ -63,6 +66,9 @@ export default function QuizView({ contentId, competencyId }) {
     if (currentQ === demoQuiz.questions.length - 1) {
       const mastery = score / demoQuiz.questions.length
       updateMastery(competencyId, mastery)
+      if (user) {
+        storage.saveProgress(user.id, competencyId, mastery)
+      }
       setCompleted(true)
     } else {
       setCurrentQ(prev => prev + 1)

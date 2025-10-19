@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BookOpen, Upload, BarChart, Award, Home, Sparkles, Brain, Target, Zap, LogOut, GraduationCap } from 'lucide-react'
+import { BookOpen, Upload, BarChart, Award, Home, Sparkles, Brain, Target, Zap, LogOut, GraduationCap, ClipboardCheck } from 'lucide-react'
 import SignIn from './components/auth/SignIn'
 import SignUp from './components/auth/SignUp'
 import ContentUpload from './components/student/ContentUpload'
@@ -68,6 +68,7 @@ function App() {
               <NavButton icon={Home} label="Home" active={activeView === 'home'} onClick={() => setActiveView('home')} />
               <NavButton icon={Upload} label="Upload" active={activeView === 'upload'} onClick={() => setActiveView('upload')} />
               <NavButton icon={GraduationCap} label="Learn" active={activeView === 'learn'} onClick={() => setActiveView('learn')} />
+              <NavButton icon={ClipboardCheck} label="Quiz" active={activeView === 'quiz'} onClick={() => setActiveView('quiz')} />
               <NavButton icon={BarChart} label="Progress" active={activeView === 'progress'} onClick={() => setActiveView('progress')} />
               <NavButton icon={Award} label="Badges" active={activeView === 'badges'} onClick={() => setActiveView('badges')} />
               <button

@@ -60,7 +60,8 @@
 ```
 ✅ Frontend: Vercel
 ✅ Backend: Render.com
-✅ CouchDB: IBM Cloudant (free tier)
+✅ Database: SQLite (included)
+✅ Files: Static serving (included)
 ```
 
 ---

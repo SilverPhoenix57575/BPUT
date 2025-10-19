@@ -1,64 +1,42 @@
-import PouchDB from 'pouchdb'
-
-// Simplified for demo - plugin can be added later if needed
+// Using localStorage instead of PouchDB (AWS S3 for backend storage)
 
 class OfflineStorage {
   constructor() {
-    this.contentDB = new PouchDB('content')
-    this.progressDB = new PouchDB('progress')
-    this.notebooksDB = new PouchDB('notebooks')
-    this.remoteURL = import.meta.env.VITE_COUCHDB_URL
     this.isOnline = navigator.onLine
-    
     window.addEventListener('online', () => this.isOnline = true)
     window.addEventListener('offline', () => this.isOnline = false)
   }
 
   setupSync() {
-    if (!this.remoteURL || this.remoteURL.includes('your-cloudant')) return
-    
-    this.contentDB.sync(this.remoteURL + '/content', { live: true, retry: true })
-    this.progressDB.sync(this.remoteURL + '/progress', { live: true, retry: true })
-    this.notebooksDB.sync(this.remoteURL + '/notebooks', { live: true, retry: true })
+    // AWS S3 sync handled by backend
   }
 
   async saveContent(content) {
-    return await this.contentDB.put({
-      _id: `content_${Date.now()}`,
-      ...content,
-      timestamp: new Date().toISOString()
-    })
+    const contents = JSON.parse(localStorage.getItem('contents') || '[]')
+    const newContent = { _id: `content_${Date.now()}`, ...content, timestamp: new Date().toISOString() }
+    contents.push(newContent)
+    localStorage.setItem('contents', JSON.stringify(contents))
+    return newContent
   }
 
   async getAllContent() {
-    const result = await this.contentDB.allDocs({ include_docs: true })
-    return result.rows.map(row => row.doc)
+    return JSON.parse(localStorage.getItem('contents') || '[]')
   }
 
   async saveProgress(userId, competencyId, data) {
-    const id = `progress_${userId}_${competencyId}`
-    try {
-      const existing = await this.progressDB.get(id).catch(() => null)
-      await this.progressDB.put({
-        _id: id,
-        _rev: existing?._rev,
-        userId,
-        competencyId,
-        ...data,
-        updatedAt: new Date().toISOString()
-      })
-    } catch (err) {
-      console.error('Progress save error:', err)
-    }
+    const key = `progress_${userId}_${competencyId}`
+    localStorage.setItem(key, JSON.stringify({ userId, competencyId, ...data, updatedAt: new Date().toISOString() }))
   }
 
   async getProgress(userId) {
-    const result = await this.progressDB.allDocs({ 
-      include_docs: true,
-      startkey: `progress_${userId}_`,
-      endkey: `progress_${userId}_\ufff0`
-    })
-    return result.rows.map(row => row.doc)
+    const progress = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key.startsWith(`progress_${userId}_`)) {
+        progress.push(JSON.parse(localStorage.getItem(key)))
+      }
+    }
+    return progress
   }
 }
 

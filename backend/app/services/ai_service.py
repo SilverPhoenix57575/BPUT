@@ -2,6 +2,8 @@ import google.generativeai as genai
 from ..config import settings
 from ..cache import ai_cache
 import logging
+import asyncio
+from functools import partial
 
 logger = logging.getLogger(__name__)
 
@@ -9,7 +11,7 @@ genai.configure(api_key=settings.GEMINI_API_KEY)
 
 class AIService:
     def __init__(self):
-        self.model = genai.GenerativeModel('gemini-pro')
+        self.model = genai.GenerativeModel('gemini-2.0-flash')
     
     async def enhance_content(self, text: str, level: str) -> str:
         prompt = f"""Simplify this content for a {level} level student. Make it clear and engaging:
@@ -21,23 +23,34 @@ Provide a simplified version that's easy to understand."""
         response = self.model.generate_content(prompt)
         return response.text
     
-    async def answer_question(self, question: str, content_id: str = None) -> str:
-        cache_key = ai_cache.get_key("question", question)
-        cached = ai_cache.get(cache_key)
-        if cached:
-            logger.info("Returning cached answer")
-            return cached
-        
-        prompt = f"""Answer this question clearly and concisely:
+    async def answer_question(self, question: str, content_id: str = None, chat_history: list = None) -> str:
+        try:
+            history_text = ""
+            if chat_history:
+                for msg in chat_history[-6:]:
+                    role = "User" if msg.get("role") == "user" else "Assistant"
+                    history_text += f"{role}: {msg.get('content', '')}\n"
+            
+            prompt = f"""You are a helpful AI learning assistant for computer science students.
 
-Question: {question}
+{history_text}
+User: {question}
 
-Provide a helpful answer suitable for a computer science student."""
-        
-        response = self.model.generate_content(prompt)
-        answer = response.text
-        ai_cache.set(cache_key, answer)
-        return answer
+Provide a clear, helpful answer:"""
+            
+            logger.info("Calling Gemini API...")
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(None, partial(self.model.generate_content, prompt))
+            
+            if not response or not response.text:
+                raise ValueError("Empty response from Gemini API")
+            
+            answer = response.text
+            logger.info(f"Got answer: {answer[:100]}...")
+            return answer
+        except Exception as e:
+            logger.error(f"Gemini API error: {str(e)}", exc_info=True)
+            raise Exception(f"AI service error: {str(e)}")
     
     async def generate_quiz(self, content_id: str, num_questions: int) -> list:
         prompt = f"""Generate {num_questions} multiple choice questions about computer science fundamentals.

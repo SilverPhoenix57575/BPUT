@@ -3,11 +3,16 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from ..database import get_db
 from ..models import User
-from passlib.context import CryptContext
+import hashlib
 import uuid
 
 router = APIRouter()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def verify_password(password: str, hashed: str) -> bool:
+    return hash_password(password) == hashed
 
 class SignupRequest(BaseModel):
     email: str
@@ -25,7 +30,7 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
     
     user_id = f"user_{uuid.uuid4().hex[:12]}"
-    hashed_password = pwd_context.hash(request.password)
+    hashed_password = hash_password(request.password)
     
     user = User(
         id=user_id,
@@ -46,7 +51,10 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
 @router.post("/login")
 def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == request.email).first()
-    if not user or not pwd_context.verify(request.password, user.hashed_password):
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    if not verify_password(request.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     return {

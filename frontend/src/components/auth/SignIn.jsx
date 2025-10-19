@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Mail, Lock, Brain, Sparkles } from 'lucide-react'
+import { Mail, Lock, Brain, Sparkles, AlertCircle } from 'lucide-react'
 
-export default function SignIn({ onSignIn, onSwitchToSignUp }) {
+export default function SignIn({ onSignIn, onSwitchToSignUp, loading, error }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
@@ -55,11 +55,19 @@ export default function SignIn({ onSignIn, onSwitchToSignUp }) {
               </div>
             </div>
 
+            {error && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 

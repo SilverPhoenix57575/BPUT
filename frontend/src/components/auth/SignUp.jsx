@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Mail, Lock, User, Brain, GraduationCap, BookOpen } from 'lucide-react'
+import { Mail, Lock, User, Brain, GraduationCap, BookOpen, AlertCircle } from 'lucide-react'
 
-export default function SignUp({ onSignUp, onSwitchToSignIn }) {
+export default function SignUp({ onSignUp, onSwitchToSignIn, loading, error }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -108,11 +108,19 @@ export default function SignUp({ onSignUp, onSwitchToSignIn }) {
               </div>
             </div>
 
+            {error && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Account
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 

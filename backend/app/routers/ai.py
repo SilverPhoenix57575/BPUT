@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+from typing import Optional
 from ..services.ai_service import AIService
 import logging
 
@@ -10,12 +11,13 @@ ai_service = AIService()
 
 class EnhanceRequest(BaseModel):
     text: str = Field(..., min_length=10, max_length=10000)
-    level: str = Field(default="beginner", pattern="^(beginner|intermediate|advanced)$")
+    level: str = Field(default="beginner")
 
 class QuestionRequest(BaseModel):
     question: str = Field(..., min_length=3, max_length=500)
-    contentId: str = None
-    userId: str = "default_user"
+    contentId: Optional[str] = None
+    userId: Optional[str] = None
+    chatHistory: Optional[list] = None
 
 class QuizRequest(BaseModel):
     contentId: str
@@ -42,20 +44,21 @@ async def enhance_content(request: EnhanceRequest):
 @router.post("/question")
 async def ask_question(request: QuestionRequest):
     try:
-        logger.info(f"Processing question for user: {request.userId}")
-        answer = await ai_service.answer_question(request.question, request.contentId)
+        logger.info(f"Received question: {request.question[:50]}... for user: {request.userId}")
+        logger.info(f"ContentId: {request.contentId}")
+        answer = await ai_service.answer_question(request.question, request.contentId, request.chatHistory)
         logger.info("Question answered successfully")
         return {
             "answer": answer,
-            "citations": [],
+            "citations": [{"source": "AI Assistant", "page": 1}],
             "confidence": 0.92
         }
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Invalid question: {str(e)}")
     except Exception as e:
-        logger.error(f"Question answering error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to answer question. Please try again.")
+        logger.error(f"Question answering error: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to answer question: {str(e)}")
 
 @router.post("/quiz")
 async def generate_quiz(request: QuizRequest):

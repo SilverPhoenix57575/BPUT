@@ -9,25 +9,50 @@ import ProgressDashboard from './components/student/ProgressDashboard'
 import BadgeDisplay from './components/gamification/BadgeDisplay'
 import useUserStore from './stores/userStore'
 import useContentStore from './stores/contentStore'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 function App() {
   const [authView, setAuthView] = useState('signin')
   const { user, setUser, logout } = useUserStore()
   const [activeView, setActiveView] = useState('home')
   const currentContent = useContentStore(state => state.currentContent)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSignIn = (credentials) => {
-    setUser({ id: 'user_123', email: credentials.email, role: 'student' })
+  const handleSignIn = async (credentials) => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await axios.post(`${API_URL}/api/auth/login`, credentials)
+      setUser({ ...response.data, email: credentials.email })
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Login failed')
+      console.error('Login error:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleSignUp = (userData) => {
-    setUser({ id: 'user_' + Date.now(), ...userData })
+  const handleSignUp = async (userData) => {
+    setLoading(true)
+    setError('')
+    try {
+      const response = await axios.post(`${API_URL}/api/auth/signup`, userData)
+      setUser({ ...response.data, email: userData.email, name: userData.name })
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Signup failed')
+      console.error('Signup error:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (!user) {
     return authView === 'signin' 
-      ? <SignIn onSignIn={handleSignIn} onSwitchToSignUp={() => setAuthView('signup')} />
-      : <SignUp onSignUp={handleSignUp} onSwitchToSignIn={() => setAuthView('signin')} />
+      ? <SignIn onSignIn={handleSignIn} onSwitchToSignUp={() => setAuthView('signup')} loading={loading} error={error} />
+      : <SignUp onSignUp={handleSignUp} onSwitchToSignIn={() => setAuthView('signin')} loading={loading} error={error} />
   }
 
   const renderContent = () => {

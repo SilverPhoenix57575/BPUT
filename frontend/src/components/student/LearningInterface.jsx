@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Send, BookOpen, MessageCircle, Sparkles } from 'lucide-react'
 import { aiAPI } from '../../services/api'
 import useUserStore from '../../stores/userStore'
+import ReactMarkdown from 'react-markdown'
 
 export default function LearningInterface({ content }) {
   const [question, setQuestion] = useState('')
@@ -21,8 +22,8 @@ export default function LearningInterface({ content }) {
     setLoading(true)
 
     try {
-      // Call backend AI API
-      const response = await aiAPI.question(currentQuestion, content?.id || 'demo', user?.id || 'user_123')
+      // Call backend AI API with chat history
+      const response = await aiAPI.question(currentQuestion, content?.id || 'demo', user?.id || 'user_123', messages)
       
       const aiMessage = { 
         role: 'assistant', 
@@ -89,7 +90,13 @@ export default function LearningInterface({ content }) {
                     ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white' 
                     : 'bg-gray-100 text-gray-800'
                 }`}>
-                  <p className="text-sm leading-relaxed">{msg.content}</p>
+                  {msg.role === 'user' ? (
+                    <p className="text-sm leading-relaxed">{msg.content}</p>
+                  ) : (
+                    <div className="text-sm leading-relaxed prose prose-sm max-w-none">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  )}
                   {msg.citations && (
                     <div className="mt-2 pt-2 border-t border-gray-300 text-xs opacity-75">
                       📚 Sources: {msg.citations.map(c => c.source).join(', ')}

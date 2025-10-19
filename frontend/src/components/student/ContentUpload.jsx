@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Upload, FileText, Image, Youtube, CheckCircle, AlertCircle } from 'lucide-react'
 import { contentAPI } from '../../services/api'
-import storage from '../../services/storage'
+import storage from '../../services/pouchdb'
 import useContentStore from '../../stores/contentStore'
 import useUserStore from '../../stores/userStore'
 

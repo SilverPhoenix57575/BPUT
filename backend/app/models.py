@@ -19,6 +19,7 @@ class Content(Base):
     user_id = Column(String, ForeignKey("users.id"))
     filename = Column(String)
     content_type = Column(String)
+    file_url = Column(String)
     extracted_text = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 

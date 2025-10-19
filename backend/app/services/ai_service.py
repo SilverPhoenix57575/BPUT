@@ -1,5 +1,9 @@
 import google.generativeai as genai
 from ..config import settings
+from ..cache import ai_cache
+import logging
+
+logger = logging.getLogger(__name__)
 
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
@@ -18,6 +22,12 @@ Provide a simplified version that's easy to understand."""
         return response.text
     
     async def answer_question(self, question: str, content_id: str = None) -> str:
+        cache_key = ai_cache.get_key("question", question)
+        cached = ai_cache.get(cache_key)
+        if cached:
+            logger.info("Returning cached answer")
+            return cached
+        
         prompt = f"""Answer this question clearly and concisely:
 
 Question: {question}
@@ -25,7 +35,9 @@ Question: {question}
 Provide a helpful answer suitable for a computer science student."""
         
         response = self.model.generate_content(prompt)
-        return response.text
+        answer = response.text
+        ai_cache.set(cache_key, answer)
+        return answer
     
     async def generate_quiz(self, content_id: str, num_questions: int) -> list:
         prompt = f"""Generate {num_questions} multiple choice questions about computer science fundamentals.

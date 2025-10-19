@@ -25,7 +25,6 @@ uvicorn app.main:app --reload
 ### Frontend (.env in frontend/)
 ```
 VITE_API_URL=http://localhost:8000
-VITE_COUCHDB_URL=https://your-cloudant-url.cloudant.com
 VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
@@ -33,9 +32,7 @@ VITE_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 GEMINI_API_KEY=your_gemini_api_key_here
 DATABASE_URL=sqlite:///./app.db
-COUCHDB_URL=https://your-cloudant-url.cloudant.com
-COUCHDB_USER=your_username
-COUCHDB_PASSWORD=your_password
+SECRET_KEY=your-secret-key
 ```
 
 ## 📂 Project Structure

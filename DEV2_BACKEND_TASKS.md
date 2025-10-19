@@ -123,7 +123,7 @@ backend/
 - [ ] Test all endpoints
 - [ ] Setup CORS properly
 - [ ] Deploy to Render.com
-- [ ] Setup CouchDB (Cloudant)
+- [ ] Test file uploads
 
 ## 🔌 API Endpoints You'll Build
 
@@ -296,9 +296,6 @@ Create `.env` in `backend/`:
 ```
 GEMINI_API_KEY=your_actual_api_key_here
 DATABASE_URL=sqlite:///./app.db
-COUCHDB_URL=https://your-cloudant-url.cloudant.com
-COUCHDB_USER=your_username
-COUCHDB_PASSWORD=your_password
 SECRET_KEY=generate-a-secure-random-key
 ```
 

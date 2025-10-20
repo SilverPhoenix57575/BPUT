@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- CRITICAL: Prevent FOUC - Must be before any stylesheets -->
+    <script>
+      (function() {
+        const t = localStorage.getItem('app-theme') || 
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+      })();
+    </script>
+    
     <title>AI Learning Platform</title>
   </head>
   <body>

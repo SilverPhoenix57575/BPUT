@@ -101,10 +101,14 @@ export default function QuizView({ contentId, competencyId }) {
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto p-6">
-        <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
+        <div className="rounded-2xl shadow-xl p-12 text-center" style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          borderColor: 'var(--color-border-primary)',
+          borderWidth: '1px'
+        }}>
           <Sparkles className="mx-auto mb-4 text-purple-600 animate-pulse" size={64} />
-          <h2 className="text-2xl font-bold mb-2">Generating AI Quiz...</h2>
-          <p className="text-gray-600">Creating personalized questions for you</p>
+          <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Generating AI Quiz...</h2>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Creating personalized questions for you</p>
         </div>
       </div>
     )
@@ -114,13 +118,17 @@ export default function QuizView({ contentId, competencyId }) {
     const percentage = Math.round((score / quiz.questions.length) * 100)
     return (
       <div className="max-w-3xl mx-auto p-6">
-        <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
+        <div className="rounded-2xl shadow-xl p-12 text-center" style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          borderColor: 'var(--color-border-primary)',
+          borderWidth: '1px'
+        }}>
           <Award className={`mx-auto mb-6 ${percentage >= 70 ? 'text-green-500' : 'text-yellow-500'}`} size={80} />
-          <h2 className="text-4xl font-bold mb-4">Quiz Complete!</h2>
-          <div className="text-6xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+          <h2 className="text-4xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Quiz Complete!</h2>
+          <div className="text-6xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
             {percentage}%
           </div>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl mb-8" style={{ color: 'var(--color-text-secondary)' }}>
             You got {score} out of {quiz.questions.length} questions correct
           </p>
           {percentage >= 70 ? (
@@ -140,13 +148,17 @@ export default function QuizView({ contentId, competencyId }) {
   return (
     <div className="max-w-3xl mx-auto p-6">
       <div className="mb-6">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
           Knowledge Check
         </h2>
-        <p className="text-gray-600">Test your understanding of {competencyId}</p>
+        <p style={{ color: 'var(--color-text-secondary)' }}>Test your understanding of {competencyId}</p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+      <div className="rounded-2xl shadow-xl p-8" style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        borderColor: 'var(--color-border-primary)',
+        borderWidth: '1px'
+      }}>
         <div className="flex justify-between items-center mb-6">
           <span className="text-sm font-semibold text-gray-500">
             Question {currentQ + 1} of {quiz.questions.length}
@@ -164,7 +176,7 @@ export default function QuizView({ contentId, competencyId }) {
           </div>
         </div>
 
-        <h3 className="text-2xl font-bold mb-8">{question.question}</h3>
+        <h3 className="text-2xl font-bold mb-8" style={{ color: 'var(--color-text-primary)' }}>{question.question}</h3>
 
         <div className="space-y-3 mb-8">
           {question.options.map((option, idx) => (
@@ -189,7 +201,7 @@ export default function QuizView({ contentId, competencyId }) {
                   {showResult && idx === question.correctAnswer && <CheckCircle className="text-white" size={16} />}
                   {showResult && selected === idx && idx !== question.correctAnswer && <XCircle className="text-white" size={16} />}
                 </div>
-                <span className="font-medium">{option}</span>
+                <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{option}</span>
               </div>
             </button>
           ))}

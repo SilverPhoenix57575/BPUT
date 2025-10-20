@@ -60,16 +60,19 @@ export default function ContentUpload() {
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
           Upload Learning Content
         </h2>
-        <p className="text-gray-600">Upload PDFs, documents, images, or YouTube links to start learning</p>
+        <p style={{ color: 'var(--color-text-secondary)' }}>Upload PDFs, documents, images, or YouTube links to start learning</p>
       </div>
       
-      <div className="bg-white rounded-2xl shadow-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-blue-500 hover:shadow-xl transition-all mb-8">
+      <div className="rounded-2xl shadow-lg border-2 border-dashed p-12 text-center hover:border-blue-500 hover:shadow-xl transition-all mb-8" style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        borderColor: 'var(--color-border-primary)'
+      }}>
         <Upload className="mx-auto mb-4 text-blue-600" size={64} />
-        <h3 className="text-xl font-bold mb-2">Drop your files here</h3>
-        <p className="text-gray-600 mb-6">or click to browse from your device</p>
+        <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Drop your files here</h3>
+        <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>or click to browse from your device</p>
         
         <input
           type="file"
@@ -127,12 +130,16 @@ export default function ContentUpload() {
 
 function FormatCard({ icon: Icon, title, description, gradient }) {
   return (
-    <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-all">
+    <div className="rounded-xl p-6 shadow-md hover:shadow-lg transition-all" style={{
+      backgroundColor: 'var(--color-bg-primary)',
+      borderColor: 'var(--color-border-primary)',
+      borderWidth: '1px'
+    }}>
       <div className={`bg-gradient-to-br ${gradient} w-14 h-14 rounded-xl flex items-center justify-center mb-4`}>
         <Icon className="text-white" size={28} />
       </div>
-      <h3 className="font-bold text-lg mb-2">{title}</h3>
-      <p className="text-gray-600 text-sm">{description}</p>
+      <h3 className="font-bold text-lg mb-2" style={{ color: 'var(--color-text-primary)' }}>{title}</h3>
+      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{description}</p>
     </div>
   )
 }

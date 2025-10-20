@@ -19,8 +19,7 @@ export const contentAPI = {
 
 export const aiAPI = {
   enhance: (text, level) => api.post('/api/ai/enhance', { text, level }),
-  question: (question, contentId, userId, chatHistory) => 
-    api.post('/api/ai/question', { question, contentId, userId, chatHistory }),
+  question: (data) => api.post('/api/ai/question', data),
   quiz: (contentId, competencyId, numQuestions) => 
     api.post('/api/ai/quiz', { contentId, competencyId, numQuestions })
 }

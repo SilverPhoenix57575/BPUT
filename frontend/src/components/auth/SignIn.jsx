@@ -11,22 +11,26 @@ export default function SignIn({ onSignIn, onSwitchToSignUp, loading, error }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6" style={{ background: 'var(--color-bg-secondary)' }}>
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-600 p-3 rounded-2xl mb-4">
             <Brain className="text-white" size={40} />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             Welcome Back
           </h1>
-          <p className="text-gray-600">Sign in to continue your learning journey</p>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Sign in to continue your learning journey</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div className="rounded-2xl shadow-xl p-8" style={{ 
+          backgroundColor: 'var(--color-bg-primary)', 
+          borderColor: 'var(--color-border-primary)',
+          borderWidth: '1px'
+        }}>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Email</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -34,14 +38,20 @@ export default function SignIn({ onSignIn, onSwitchToSignUp, loading, error }) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  style={{ 
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border-primary)',
+                    borderWidth: '1px',
+                    color: 'var(--color-text-primary)'
+                  }}
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                 <input
@@ -49,7 +59,13 @@ export default function SignIn({ onSignIn, onSwitchToSignUp, loading, error }) {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  style={{ 
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border-primary)',
+                    borderWidth: '1px',
+                    color: 'var(--color-text-primary)'
+                  }}
                   required
                 />
               </div>
@@ -72,7 +88,7 @@ export default function SignIn({ onSignIn, onSwitchToSignUp, loading, error }) {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p style={{ color: 'var(--color-text-secondary)' }}>
               Don't have an account?{' '}
               <button
                 onClick={onSwitchToSignUp}
@@ -85,7 +101,7 @@ export default function SignIn({ onSignIn, onSwitchToSignUp, loading, error }) {
         </div>
 
         <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-2 text-sm text-gray-500">
+          <div className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--color-text-tertiary)' }}>
             <Sparkles size={16} />
             <span>Offline-first • Privacy-first • Student-first</span>
           </div>

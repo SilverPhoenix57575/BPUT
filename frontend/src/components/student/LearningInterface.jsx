@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Send, BookOpen, MessageCircle, Sparkles } from 'lucide-react'
 import { aiAPI } from '../../services/api'
 import useUserStore from '../../stores/userStore'
-import ReactMarkdown from 'react-markdown'
 
 export default function LearningInterface({ content }) {
   const [question, setQuestion] = useState('')
@@ -93,8 +92,8 @@ export default function LearningInterface({ content }) {
                   {msg.role === 'user' ? (
                     <p className="text-sm leading-relaxed">{msg.content}</p>
                   ) : (
-                    <div className="text-sm leading-relaxed prose prose-sm max-w-none">
-                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {msg.content}
                     </div>
                   )}
                   {msg.citations && (

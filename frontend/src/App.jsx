@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Home, Sparkles, Brain, Target, Zap, LogOut, GraduationCap, ClipboardCheck, User, BarChart } from 'lucide-react'
+import { Sparkles, Brain, Target, Zap, LogOut, ClipboardCheck, User, BarChart, Library, MessageSquare } from 'lucide-react'
 import SignIn from './components/auth/SignIn'
 import SignUp from './components/auth/SignUp'
-import LearningInterface from './components/student/LearningInterface'
 import QuizView from './components/student/QuizView'
 import Profile from './components/student/Profile'
+import KnowledgeHub from './components/hub/KnowledgeHub'
+import AIChat from './components/shared/AIChat'
 import ThemeToggle from './components/shared/ThemeToggle'
 import useUserStore from './stores/userStore'
 import useContentStore from './stores/contentStore'
@@ -56,8 +57,10 @@ function App() {
 
   const renderContent = () => {
     switch(activeView) {
-      case 'learn':
-        return <LearningInterface content={currentContent} />
+      case 'chat':
+        return <AIChat />
+      case 'hub':
+        return <KnowledgeHub />
       case 'quiz':
         return <QuizView contentId={currentContent?.id || 'demo'} competencyId="cs_001" />
       case 'profile':
@@ -75,7 +78,7 @@ function App() {
       }}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-20">
-            <div className="flex items-center gap-3">
+            <button onClick={() => setActiveView('home')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-xl">
                 <Brain className="text-white" size={28} />
               </div>
@@ -85,11 +88,11 @@ function App() {
                 </span>
                 <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>Welcome, {user.name || user.email}</p>
               </div>
-            </div>
+            </button>
             
             <div className="flex items-center gap-2">
-              <NavButton icon={Home} label="Home" active={activeView === 'home'} onClick={() => setActiveView('home')} />
-              <NavButton icon={GraduationCap} label="Learn" active={activeView === 'learn'} onClick={() => setActiveView('learn')} />
+              <NavButton icon={MessageSquare} label="AI Chat" active={activeView === 'chat'} onClick={() => setActiveView('chat')} />
+              <NavButton icon={Library} label="Knowledge Hub" active={activeView === 'hub'} onClick={() => setActiveView('hub')} />
               <NavButton icon={ClipboardCheck} label="Quiz" active={activeView === 'quiz'} onClick={() => setActiveView('quiz')} />
               <NavButton icon={User} label="Profile" active={activeView === 'profile'} onClick={() => setActiveView('profile')} />
               <ThemeToggle />
@@ -155,11 +158,11 @@ function HomePage({ onNavigate }) {
 
       <div className="grid md:grid-cols-2 gap-6">
         <ActionCard
-          icon={GraduationCap}
-          title="Start Learning"
-          description="Interactive AI-powered learning experience"
+          icon={MessageSquare}
+          title="AI Chat"
+          description="Get instant answers with rich formatting and code examples"
           gradient="from-blue-600 to-blue-700"
-          onClick={() => onNavigate('learn')}
+          onClick={() => onNavigate('chat')}
         />
         <ActionCard
           icon={User}

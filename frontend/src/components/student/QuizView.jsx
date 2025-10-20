@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { CheckCircle, XCircle, Award, ArrowRight } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { CheckCircle, XCircle, Award, ArrowRight, Sparkles } from 'lucide-react'
 import storage from '../../services/storage'
 import useProgressStore from '../../stores/progressStore'
 import useUserStore from '../../stores/userStore'
+import { aiAPI } from '../../services/api'
 
 const demoQuiz = {
   questions: [
@@ -51,10 +52,30 @@ export default function QuizView({ contentId, competencyId }) {
   const [showResult, setShowResult] = useState(false)
   const [score, setScore] = useState(0)
   const [completed, setCompleted] = useState(false)
+  const [quiz, setQuiz] = useState(demoQuiz)
+  const [loading, setLoading] = useState(false)
   const updateMastery = useProgressStore(state => state.updateMastery)
   const user = useUserStore(state => state.user)
 
-  const question = demoQuiz.questions[currentQ]
+  useEffect(() => {
+    generateAIQuiz()
+  }, [contentId, competencyId])
+
+  const generateAIQuiz = async () => {
+    setLoading(true)
+    try {
+      const response = await aiAPI.quiz(contentId || 'demo', competencyId || 'programming', 5)
+      if (response.data.questions && response.data.questions.length > 0) {
+        setQuiz({ questions: response.data.questions })
+      }
+    } catch (error) {
+      console.log('Using demo quiz:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const question = quiz.questions[currentQ]
 
   const handleAnswer = () => {
     const correct = selected === question.correctAnswer
@@ -63,8 +84,8 @@ export default function QuizView({ contentId, competencyId }) {
   }
 
   const nextQuestion = () => {
-    if (currentQ === demoQuiz.questions.length - 1) {
-      const mastery = score / demoQuiz.questions.length
+    if (currentQ === quiz.questions.length - 1) {
+      const mastery = score / quiz.questions.length
       updateMastery(competencyId, mastery)
       if (user) {
         storage.saveProgress(user.id, competencyId, mastery)
@@ -77,8 +98,20 @@ export default function QuizView({ contentId, competencyId }) {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto p-6">
+        <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
+          <Sparkles className="mx-auto mb-4 text-purple-600 animate-pulse" size={64} />
+          <h2 className="text-2xl font-bold mb-2">Generating AI Quiz...</h2>
+          <p className="text-gray-600">Creating personalized questions for you</p>
+        </div>
+      </div>
+    )
+  }
+
   if (completed) {
-    const percentage = Math.round((score / demoQuiz.questions.length) * 100)
+    const percentage = Math.round((score / quiz.questions.length) * 100)
     return (
       <div className="max-w-3xl mx-auto p-6">
         <div className="bg-white rounded-2xl shadow-xl p-12 text-center border border-gray-100">
@@ -88,7 +121,7 @@ export default function QuizView({ contentId, competencyId }) {
             {percentage}%
           </div>
           <p className="text-xl text-gray-600 mb-8">
-            You got {score} out of {demoQuiz.questions.length} questions correct
+            You got {score} out of {quiz.questions.length} questions correct
           </p>
           {percentage >= 70 ? (
             <div className="bg-green-100 text-green-800 px-6 py-3 rounded-xl inline-block font-semibold">
@@ -116,10 +149,10 @@ export default function QuizView({ contentId, competencyId }) {
       <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
         <div className="flex justify-between items-center mb-6">
           <span className="text-sm font-semibold text-gray-500">
-            Question {currentQ + 1} of {demoQuiz.questions.length}
+            Question {currentQ + 1} of {quiz.questions.length}
           </span>
           <div className="flex gap-2">
-            {demoQuiz.questions.map((_, idx) => (
+            {quiz.questions.map((_, idx) => (
               <div
                 key={idx}
                 className={`w-2 h-2 rounded-full ${
@@ -187,7 +220,7 @@ export default function QuizView({ contentId, competencyId }) {
               onClick={nextQuestion}
               className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all flex items-center gap-2"
             >
-              {currentQ === demoQuiz.questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
+              {currentQ === quiz.questions.length - 1 ? 'Finish Quiz' : 'Next Question'}
               <ArrowRight size={20} />
             </button>
           )}

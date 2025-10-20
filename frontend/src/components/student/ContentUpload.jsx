@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Upload, FileText, Image, Youtube, CheckCircle, AlertCircle } from 'lucide-react'
+import { Upload, FileText, Image, Youtube, CheckCircle, AlertCircle, Sparkles } from 'lucide-react'
 import { contentAPI } from '../../services/api'
 import storage from '../../services/pouchdb'
 import useContentStore from '../../stores/contentStore'
@@ -9,6 +9,7 @@ export default function ContentUpload() {
   const [uploading, setUploading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [uploadedContent, setUploadedContent] = useState(null)
   const addContent = useContentStore(state => state.addContent)
   const user = useUserStore(state => state.user)
 
@@ -32,8 +33,8 @@ export default function ContentUpload() {
       // Save to localStorage as backup
       storage.saveContent(content)
       addContent(content)
+      setUploadedContent(content)
       setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
       console.error('Backend upload failed, saving locally:', err)
       
@@ -48,12 +49,9 @@ export default function ContentUpload() {
       
       storage.saveContent(content)
       addContent(content)
+      setUploadedContent(content)
       setSuccess(true)
       setError('Saved locally (backend unavailable)')
-      setTimeout(() => {
-        setSuccess(false)
-        setError('')
-      }, 3000)
     } finally {
       setUploading(false)
     }

@@ -53,29 +53,77 @@ Provide a clear, helpful answer:"""
             raise Exception(f"AI service error: {str(e)}")
     
     async def generate_quiz(self, content_id: str, num_questions: int) -> list:
-        prompt = f"""Generate {num_questions} multiple choice questions about computer science fundamentals.
+        try:
+            prompt = f"""Generate {num_questions} multiple choice questions about computer science fundamentals.
 
-Format each question as:
-Question: [question text]
-A) [option]
-B) [option]
-C) [option]
-D) [option]
+For each question, provide EXACTLY in this format:
+Q: [question text]
+A) [option 1]
+B) [option 2]
+C) [option 3]
+D) [option 4]
 Correct: [A/B/C/D]
-Explanation: [brief explanation]"""
-        
-        response = self.model.generate_content(prompt)
-        
-        return [
-            {
-                "id": f"q{i+1}",
-                "question": f"Sample question {i+1}",
-                "options": ["Option A", "Option B", "Option C", "Option D"],
-                "correctAnswer": 0,
-                "explanation": "This is the correct answer because..."
-            }
-            for i in range(num_questions)
-        ]
+Explanation: [brief explanation]
+
+Separate each question with ---"""
+            
+            logger.info("Generating quiz with Gemini...")
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(None, partial(self.model.generate_content, prompt))
+            
+            if not response or not response.text:
+                raise ValueError("Empty response")
+            
+            # Parse the response
+            questions = []
+            blocks = response.text.split('---')
+            
+            for i, block in enumerate(blocks[:num_questions]):
+                lines = [l.strip() for l in block.strip().split('\n') if l.strip()]
+                if len(lines) < 6:
+                    continue
+                    
+                q_text = lines[0].replace('Q:', '').strip()
+                options = []
+                correct_idx = 0
+                explanation = ""
+                
+                for line in lines[1:]:
+                    if line.startswith(('A)', 'B)', 'C)', 'D)')):
+                        options.append(line[3:].strip())
+                    elif line.startswith('Correct:'):
+                        correct_letter = line.split(':')[1].strip().upper()[0]
+                        correct_idx = ord(correct_letter) - ord('A')
+                    elif line.startswith('Explanation:'):
+                        explanation = line.split(':', 1)[1].strip()
+                
+                if len(options) == 4:
+                    questions.append({
+                        "id": f"q{i+1}",
+                        "question": q_text,
+                        "options": options,
+                        "correctAnswer": correct_idx,
+                        "explanation": explanation or "Correct answer selected."
+                    })
+            
+            if not questions:
+                raise ValueError("Failed to parse questions")
+                
+            return questions
+            
+        except Exception as e:
+            logger.error(f"Quiz generation error: {e}")
+            # Return demo questions as fallback
+            return [
+                {
+                    "id": f"q{i+1}",
+                    "question": "What is a variable in programming?",
+                    "options": ["A container for data", "A loop", "A function", "A language"],
+                    "correctAnswer": 0,
+                    "explanation": "A variable stores data values."
+                }
+                for i in range(num_questions)
+            ]
     
     async def generate_feedback(self, answer: str, question: str) -> str:
         prompt = f"""Provide constructive feedback on this answer:

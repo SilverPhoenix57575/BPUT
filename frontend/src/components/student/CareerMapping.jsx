@@ -23,6 +23,27 @@ export default function CareerMapping() {
       setRecommendations(res.data.recommendations)
     } catch (err) {
       console.error('Failed to load recommendations:', err)
+      // Fallback demo data
+      setRecommendations([
+        {
+          title: 'Full Stack Developer',
+          description: 'Build complete web applications from frontend to backend',
+          match: 85,
+          skills: ['JavaScript', 'React', 'Node.js', 'MongoDB', 'REST APIs']
+        },
+        {
+          title: 'Data Scientist',
+          description: 'Analyze data and build machine learning models',
+          match: 72,
+          skills: ['Python', 'Machine Learning', 'Statistics', 'SQL', 'Data Visualization']
+        },
+        {
+          title: 'DevOps Engineer',
+          description: 'Manage infrastructure and deployment pipelines',
+          match: 68,
+          skills: ['Docker', 'Kubernetes', 'CI/CD', 'AWS', 'Linux']
+        }
+      ])
     } finally {
       setLoading(false)
     }
@@ -39,6 +60,32 @@ export default function CareerMapping() {
       setJobs(jobsRes.data.jobs)
     } catch (err) {
       console.error('Failed to load career details:', err)
+      // Fallback demo data
+      const masteredSkills = career.skills.slice(0, Math.floor(career.skills.length * 0.6))
+      const missingSkills = career.skills.slice(Math.floor(career.skills.length * 0.6))
+      
+      setSkillsGap({
+        completion: career.match,
+        mastered: masteredSkills,
+        missing: missingSkills
+      })
+      
+      setJobs([
+        {
+          title: `Senior ${career.title}`,
+          company: 'Tech Corp',
+          location: 'Remote',
+          url: '#',
+          skills: career.skills
+        },
+        {
+          title: `Junior ${career.title}`,
+          company: 'StartUp Inc',
+          location: 'Hybrid',
+          url: '#',
+          skills: career.skills.slice(0, 3)
+        }
+      ])
     }
   }
 

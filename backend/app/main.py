@@ -1,12 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from .database import engine, Base
 from .routers import content, ai, auth, educator, career, progress, analytics, projects, pomodoro, mindmap
 from .constants import UPLOAD_DIR
 from .logger import setup_logger
 from .config import settings
+from .middleware import AIRateLimitMiddleware, LoggingMiddleware
 import os
 
 logger = setup_logger(__name__)
@@ -23,6 +26,23 @@ app = FastAPI(
 )
 
 logger.info("Starting AI Learning Platform API")
+
+# Global exception handlers
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    logger.error(f"Validation error: {exc.errors()}")
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"success": False, "error": "Invalid request data", "details": exc.errors()}
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"success": False, "error": "An unexpected error occurred"}
+    )
 
 # CORS configuration
 allowed_origins = [
@@ -47,6 +67,10 @@ app.add_middleware(
 
 # Add compression middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+# Add rate limiting middleware
+app.add_middleware(AIRateLimitMiddleware, calls=20, period=60)
+app.add_middleware(LoggingMiddleware)
 
 # API v1 routes
 app.include_router(content.router, prefix="/api/v1/content", tags=["content"])

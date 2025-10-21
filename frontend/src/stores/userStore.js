@@ -5,7 +5,10 @@ const useUserStore = create((set) => ({
   role: 'student',
   setUser: (user) => set({ user }),
   setRole: (role) => set({ role }),
-  logout: () => set({ user: null })
+  logout: () => {
+    localStorage.removeItem('token')
+    set({ user: null })
+  }
 }))
 
 export default useUserStore

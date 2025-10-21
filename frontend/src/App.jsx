@@ -26,7 +26,9 @@ function App() {
     setError('')
     try {
       const response = await axios.post(`${API_URL}/api/auth/login`, credentials)
-      setUser({ ...response.data, email: credentials.email })
+      const { token, ...userData } = response.data
+      localStorage.setItem('token', token)
+      setUser({ ...userData, email: credentials.email })
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed')
       console.error('Login error:', err)
@@ -40,7 +42,9 @@ function App() {
     setError('')
     try {
       const response = await axios.post(`${API_URL}/api/auth/signup`, userData)
-      setUser({ ...response.data, email: userData.email, name: userData.name })
+      const { token, ...userInfo } = response.data
+      localStorage.setItem('token', token)
+      setUser({ ...userInfo, email: userData.email, name: userData.name })
     } catch (err) {
       setError(err.response?.data?.detail || 'Signup failed')
       console.error('Signup error:', err)

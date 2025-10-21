@@ -24,7 +24,7 @@ Provide a simplified version that's easy to understand."""
         response = self.model.generate_content(prompt)
         return response.text
     
-    async def answer_question(self, question: str, content_id: str = None, chat_history: list = None) -> str:
+    async def answer_question(self, question: str, content_id: str = None, chat_history: list = None, response_type: str = "medium") -> str:
         try:
             history_text = ""
             if chat_history:
@@ -32,14 +32,26 @@ Provide a simplified version that's easy to understand."""
                     role = "User" if msg.get("role") == "user" else "Assistant"
                     history_text += f"{role}: {msg.get('content', '')}\n"
             
+            # Response type instructions
+            type_instructions = {
+                "basic": "Provide a simple, concise answer (2-3 sentences). Use everyday language, avoid technical jargon. Perfect for quick understanding.",
+                "medium": "Provide a balanced explanation with key concepts and examples. Include some technical terms with brief explanations. Aim for 1-2 paragraphs.",
+                "advanced": "Provide a comprehensive, in-depth answer with technical details, examples, edge cases, and best practices. Include code snippets if relevant. Explain underlying concepts thoroughly."
+            }
+            
+            instruction = type_instructions.get(response_type, type_instructions["medium"])
+            
             prompt = f"""You are a helpful AI learning assistant for computer science students.
 
 {history_text}
 User: {question}
 
-Provide a clear, helpful answer:"""
+Response Level: {response_type.upper()}
+Instructions: {instruction}
+
+Provide your answer:"""
             
-            logger.info("Calling Gemini API...")
+            logger.info(f"Calling Gemini API with {response_type} response type...")
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(None, partial(self.model.generate_content, prompt))
             

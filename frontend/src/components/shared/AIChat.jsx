@@ -13,6 +13,7 @@ export default function AIChat() {
   ])
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
+  const [responseType, setResponseType] = useState('medium')
   const user = useUserStore(state => state.user)
 
   useEffect(() => {
@@ -126,7 +127,8 @@ export default function AIChat() {
         question: currentQuestion,
         contentId: 'demo',
         userId: user?.id || 'user_123',
-        chatHistory: messages.slice(-10)
+        chatHistory: messages.slice(-10),
+        responseType: responseType
       })
       
       setMessages(prev => [...prev, {
@@ -207,11 +209,40 @@ export default function AIChat() {
 
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
-        <div className="mb-4">
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            AI Learning Assistant
-          </h2>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Ask questions and get detailed answers</p>
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              AI Learning Assistant
+            </h2>
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Ask questions and get detailed answers</p>
+          </div>
+          
+          <div className="flex gap-2">
+            {[
+              { type: 'basic', icon: '📝', label: 'Basic', color: '#10b981' },
+              { type: 'medium', icon: '📚', label: 'Medium', color: '#3b82f6' },
+              { type: 'advanced', icon: '🎓', label: 'Advanced', color: '#a855f7' }
+            ].map(({ type, icon, label, color }) => (
+              <button
+                key={type}
+                onClick={() => setResponseType(type)}
+                className="relative px-3 py-1.5 rounded-lg font-semibold text-xs transition-all duration-200 hover:scale-105"
+                style={{
+                  background: responseType === type ? color : 'var(--color-bg-secondary)',
+                  color: responseType === type ? 'white' : 'var(--color-text-secondary)',
+                  border: `2px solid ${responseType === type ? color : 'var(--color-border-primary)'}`
+                }}
+              >
+                <div className="flex items-center gap-1.5">
+                  <span>{icon}</span>
+                  <span>{label}</span>
+                </div>
+                {responseType === type && (
+                  <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-white rounded-full" />
+                )}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="flex-1 rounded-2xl shadow-lg p-6 flex flex-col" style={{

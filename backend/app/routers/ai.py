@@ -23,6 +23,7 @@ class QuestionRequest(BaseModel):
     contentId: Optional[str] = None
     userId: Optional[str] = None
     chatHistory: Optional[list] = None
+    responseType: Optional[str] = Field(default="medium", pattern="^(basic|medium|advanced)$")
 
 class QuizRequest(BaseModel):
     contentId: str
@@ -64,8 +65,8 @@ async def ask_question(request: QuestionRequest):
             "Question"
         )
         logger.info(f"Received question: {question[:50]}... for user: {request.userId}")
-        logger.info(f"ContentId: {request.contentId}")
-        answer = await ai_service.answer_question(question, request.contentId, request.chatHistory)
+        logger.info(f"ContentId: {request.contentId}, ResponseType: {request.responseType}")
+        answer = await ai_service.answer_question(question, request.contentId, request.chatHistory, request.responseType)
         logger.info("Question answered successfully")
         return {
             "success": True,

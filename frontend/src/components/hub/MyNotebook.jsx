@@ -1,14 +1,17 @@
 import { useState } from 'react'
-import { Save, Search, Tag, Trash2, Code, FileText, Eye, Sparkles } from 'lucide-react'
+import { Save, Search, Tag, Trash2, Code, FileText, Eye, Sparkles, Layers } from 'lucide-react'
 import useNotebookStore from '../../stores/notebookStore'
 import SmartNoteViewer from './SmartNoteViewer'
 import AINotesGenerator from './AINotesGenerator'
+import SmartFlashcards from './SmartFlashcards'
 
 export default function MyNotebook() {
   const { notebookItems, removeFromNotebook, addToNotebook } = useNotebookStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedNote, setSelectedNote] = useState(null)
   const [showAIGenerator, setShowAIGenerator] = useState(false)
+  const [showFlashcards, setShowFlashcards] = useState(false)
+  const [flashcardTopic, setFlashcardTopic] = useState(null)
 
   const filteredItems = notebookItems.filter(item =>
     item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -74,6 +77,16 @@ export default function MyNotebook() {
                   </div>
                 </div>
                 <div className="flex gap-1">
+                  <button 
+                    onClick={() => {
+                      setFlashcardTopic(item.title)
+                      setShowFlashcards(true)
+                    }} 
+                    className="p-2 hover:bg-purple-100 rounded" 
+                    title="Generate Flashcards"
+                  >
+                    <Layers size={18} className="text-purple-600" />
+                  </button>
                   <button onClick={() => setSelectedNote(item)} className="p-2 hover:bg-blue-100 rounded" title="View">
                     <Eye size={18} className="text-blue-600" />
                   </button>
@@ -106,6 +119,16 @@ export default function MyNotebook() {
           onSave={(note) => {
             addToNotebook(note)
             setShowAIGenerator(false)
+          }}
+        />
+      )}
+
+      {showFlashcards && flashcardTopic && (
+        <SmartFlashcards
+          topic={flashcardTopic}
+          onClose={() => {
+            setShowFlashcards(false)
+            setFlashcardTopic(null)
           }}
         />
       )}

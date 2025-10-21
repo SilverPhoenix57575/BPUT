@@ -1,23 +1,65 @@
 import { useState } from 'react'
-import { Compass, CheckCircle, Circle, BookOpen, Target } from 'lucide-react'
+import { Compass, CheckCircle, Circle, BookOpen, Target, Upload, Layers } from 'lucide-react'
+import SyllabusAnalyzer from './SyllabusAnalyzer'
+import SmartFlashcards from './SmartFlashcards'
 
 export default function LearningCompass() {
   const [mode, setMode] = useState('roadmap')
-  const [roadmap] = useState({
+  const [showSyllabusUpload, setShowSyllabusUpload] = useState(false)
+  const [showFlashcards, setShowFlashcards] = useState(false)
+  const [selectedTopic, setSelectedTopic] = useState(null)
+  const [roadmap, setRoadmap] = useState({
     title: 'Learn React',
     progress: 25,
-    steps: [
-      { id: 1, title: 'JavaScript Fundamentals', completed: true, resources: 2 },
-      { id: 2, title: 'Learn State & Props', completed: false, resources: 3, current: true },
-      { id: 3, title: 'Component Lifecycle', completed: false, resources: 2 },
-      { id: 4, title: 'Hooks (useState, useEffect)', completed: false, resources: 4 },
-      { id: 5, title: 'Context API', completed: false, resources: 2 }
+    modules: [
+      { 
+        id: 1, 
+        moduleNumber: '1', 
+        title: 'React Basics', 
+        topics: [
+          { id: '1-1', title: 'JavaScript Fundamentals', completed: true },
+          { id: '1-2', title: 'Learn State & Props', completed: false }
+        ],
+        completed: false,
+        expanded: true
+      },
+      { 
+        id: 2, 
+        moduleNumber: '2', 
+        title: 'Advanced Concepts', 
+        topics: [
+          { id: '2-1', title: 'Component Lifecycle', completed: false },
+          { id: '2-2', title: 'Hooks (useState, useEffect)', completed: false },
+          { id: '2-3', title: 'Context API', completed: false }
+        ],
+        completed: false,
+        expanded: false
+      }
     ]
   })
+  
+  const toggleModule = (moduleId) => {
+    setRoadmap(prev => ({
+      ...prev,
+      modules: prev.modules.map(m => 
+        m.id === moduleId ? { ...m, expanded: !m.expanded } : m
+      )
+    }))
+  }
 
   return (
     <div>
       {/* Mode Toggle */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setShowSyllabusUpload(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold ml-auto"
+        >
+          <Upload size={18} />
+          Upload Syllabus
+        </button>
+      </div>
+
       <div className="flex gap-2 mb-6">
         <button
           onClick={() => setMode('roadmap')}
@@ -57,27 +99,69 @@ export default function LearningCompass() {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                {roadmap.steps.map(step => (
-                  <div
-                    key={step.id}
-                    className={`p-3 rounded-lg cursor-pointer transition-all ${step.current ? 'bg-blue-50 border-2 border-blue-500' : ''}`}
-                    style={{
-                      backgroundColor: step.current ? 'rgba(59, 130, 246, 0.1)' : 'var(--color-bg-secondary)',
-                      borderColor: step.current ? 'var(--color-accent-blue)' : 'transparent'
-                    }}
-                  >
-                    <div className="flex items-center gap-2">
-                      {step.completed ? (
-                        <CheckCircle size={20} className="text-green-600" />
-                      ) : (
-                        <Circle size={20} className="text-gray-400" />
-                      )}
-                      <div className="flex-1">
-                        <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{step.title}</p>
-                        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{step.resources} resources</p>
+              <div className="space-y-3">
+                {roadmap.modules?.map(module => (
+                  <div key={module.id}>
+                    <div
+                      onClick={() => toggleModule(module.id)}
+                      className="p-3 rounded-lg cursor-pointer transition-all border"
+                      style={{ 
+                        borderColor: 'var(--color-border-primary)',
+                        backgroundColor: 'var(--color-bg-secondary)'
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        {module.completed ? (
+                          <CheckCircle size={20} className="text-green-600" />
+                        ) : (
+                          <Circle size={20} className="text-blue-600" />
+                        )}
+                        <div className="flex-1">
+                          <p className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                            Module {module.moduleNumber}: {module.title.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&')}
+                          </p>
+                          <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                            {module.topics?.length || 0} topics
+                          </p>
+                        </div>
+                        <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                          {module.expanded ? '▼' : '▶'}
+                        </span>
                       </div>
                     </div>
+                    
+                    {module.expanded && (
+                      <div className="ml-6 mt-2 space-y-1">
+                        {module.topics?.map(topic => (
+                          <div
+                            key={topic.id}
+                            className="p-2 rounded-lg transition-all group"
+                            style={{ backgroundColor: 'var(--color-bg-tertiary)' }}
+                          >
+                            <div className="flex items-center gap-2">
+                              {topic.completed ? (
+                                <CheckCircle size={16} className="text-green-600" />
+                              ) : (
+                                <Circle size={16} className="text-gray-400" />
+                              )}
+                              <p className="text-xs flex-1" style={{ color: 'var(--color-text-primary)' }}>
+                                {topic.title.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&')}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  setSelectedTopic(topic.title.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&'))
+                                  setShowFlashcards(true)
+                                }}
+                                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-blue-100 transition-all"
+                                title="Generate Flashcards"
+                              >
+                                <Layers size={14} className="text-blue-600" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -92,17 +176,11 @@ export default function LearningCompass() {
               borderWidth: '1px'
             }}>
               <h3 className="text-xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-                Learn State & Props
+                Select a topic to view resources
               </h3>
-              <div className="space-y-3">
-                <ResourceCard title="State vs. Props Explained" type="Note" author="Educator" />
-                <ResourceCard title="Stateful Component Example" type="Snippet" author="Educator" />
-                <ResourceCard title="My thoughts on 'props'" type="Note" author="Student" />
-              </div>
-
-              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm font-medium text-blue-900 mb-2">💡 AI Suggestion</p>
-                <p className="text-sm text-blue-800">You might also be interested in "Redux for State Management" from the library</p>
+              <div className="text-center py-12">
+                <BookOpen className="mx-auto mb-4 text-gray-300" size={64} />
+                <p style={{ color: 'var(--color-text-secondary)' }}>Click on a topic from the roadmap to see learning resources</p>
               </div>
             </div>
           </div>
@@ -117,6 +195,26 @@ export default function LearningCompass() {
           <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>Explore Mode</h3>
           <p style={{ color: 'var(--color-text-secondary)' }}>Browse the Shared Library freely without following a roadmap</p>
         </div>
+      )}
+
+      {showSyllabusUpload && (
+        <SyllabusAnalyzer
+          onClose={() => setShowSyllabusUpload(false)}
+          onAnalyzed={(analyzedRoadmap) => {
+            setRoadmap(analyzedRoadmap)
+            setMode('roadmap')
+          }}
+        />
+      )}
+
+      {showFlashcards && selectedTopic && (
+        <SmartFlashcards
+          topic={selectedTopic}
+          onClose={() => {
+            setShowFlashcards(false)
+            setSelectedTopic(null)
+          }}
+        />
       )}
     </div>
   )

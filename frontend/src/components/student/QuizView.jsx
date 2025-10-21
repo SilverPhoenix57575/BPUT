@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle, XCircle, Award, ArrowRight, Sparkles } from 'lucide-react'
+import { CheckCircle, XCircle, Award, ArrowRight, Sparkles, History, Plus } from 'lucide-react'
 import storage from '../../services/storage'
 import useProgressStore from '../../stores/progressStore'
 import useUserStore from '../../stores/userStore'
@@ -52,24 +52,84 @@ export default function QuizView({ contentId, competencyId }) {
   const [showResult, setShowResult] = useState(false)
   const [score, setScore] = useState(0)
   const [completed, setCompleted] = useState(false)
-  const [quiz, setQuiz] = useState(demoQuiz)
+  const [quiz, setQuiz] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [showTopicInput, setShowTopicInput] = useState(true)
+  const [topic, setTopic] = useState('')
+  const [quizHistory, setQuizHistory] = useState([])
+  const [showHistory, setShowHistory] = useState(false)
   const updateMastery = useProgressStore(state => state.updateMastery)
   const user = useUserStore(state => state.user)
 
   useEffect(() => {
-    generateAIQuiz()
-  }, [contentId, competencyId])
+    // Load quiz history from localStorage
+    const history = JSON.parse(localStorage.getItem('quizHistory') || '[]')
+    setQuizHistory(history)
+  }, [])
 
-  const generateAIQuiz = async () => {
+  const generateAIQuiz = async (quizTopic) => {
     setLoading(true)
+    setShowTopicInput(false)
     try {
-      const response = await aiAPI.quiz(contentId || 'demo', competencyId || 'programming', 5)
-      if (response.data.questions && response.data.questions.length > 0) {
-        setQuiz({ questions: response.data.questions })
-      }
+      const prompt = `Generate 5 multiple-choice quiz questions about "${quizTopic}".
+
+Format each question as:
+Q: [Question text]
+A) [Option 1]
+B) [Option 2]
+C) [Option 3]
+D) [Option 4]
+Correct: [A/B/C/D]
+Explanation: [Brief explanation]
+
+Make questions clear and educational.`
+
+      const response = await aiAPI.question({
+        question: prompt,
+        contentId: 'quiz-generator',
+        userId: user?.id || 'user_123',
+        chatHistory: []
+      })
+
+      const content = response.data.answer
+      const questions = []
+      const blocks = content.split(/Q:/g).filter(b => b.trim())
+
+      blocks.forEach(block => {
+        const lines = block.split('\n').filter(l => l.trim())
+        if (lines.length >= 6) {
+          const question = lines[0].trim()
+          const options = []
+          let correctIdx = 0
+          let explanation = ''
+
+          lines.forEach(line => {
+            if (/^[A-D]\)/.test(line)) {
+              options.push(line.substring(2).trim())
+            } else if (line.startsWith('Correct:')) {
+              const answer = line.substring(8).trim().toUpperCase()
+              correctIdx = answer.charCodeAt(0) - 65
+            } else if (line.startsWith('Explanation:')) {
+              explanation = line.substring(12).trim()
+            }
+          })
+
+          if (options.length === 4) {
+            questions.push({
+              id: `q${questions.length + 1}`,
+              question,
+              options,
+              correctAnswer: correctIdx,
+              explanation: explanation || 'Check your understanding of this concept.'
+            })
+          }
+        }
+      })
+
+      setQuiz({ questions: questions.length > 0 ? questions : demoQuiz.questions })
     } catch (error) {
-      console.log('Using demo quiz:', error)
+      console.error('Quiz generation error:', error)
+      setQuiz(demoQuiz)
     } finally {
       setLoading(false)
     }
@@ -85,7 +145,22 @@ export default function QuizView({ contentId, competencyId }) {
 
   const nextQuestion = () => {
     if (currentQ === quiz.questions.length - 1) {
+      const percentage = Math.round((score / quiz.questions.length) * 100)
       const mastery = score / quiz.questions.length
+      
+      // Save to quiz history
+      const historyEntry = {
+        id: Date.now(),
+        topic: topic,
+        score: score,
+        total: quiz.questions.length,
+        percentage: percentage,
+        date: new Date().toISOString()
+      }
+      const updatedHistory = [historyEntry, ...quizHistory].slice(0, 10)
+      localStorage.setItem('quizHistory', JSON.stringify(updatedHistory))
+      setQuizHistory(updatedHistory)
+      
       updateMastery(competencyId, mastery)
       if (user) {
         storage.saveProgress(user.id, competencyId, mastery)
@@ -96,6 +171,113 @@ export default function QuizView({ contentId, competencyId }) {
       setSelected(null)
       setShowResult(false)
     }
+  }
+
+  const resetQuiz = () => {
+    setQuiz(null)
+    setCurrentQ(0)
+    setSelected(null)
+    setShowResult(false)
+    setScore(0)
+    setCompleted(false)
+    setShowTopicInput(true)
+    setTopic('')
+  }
+
+  const calculateAverageAccuracy = () => {
+    if (quizHistory.length === 0) return 0
+    const total = quizHistory.reduce((sum, entry) => sum + entry.percentage, 0)
+    return Math.round(total / quizHistory.length)
+  }
+
+  if (showTopicInput && !loading) {
+    return (
+      <div className="max-w-3xl mx-auto p-6">
+        <div className="mb-6">
+          <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            AI Quiz Generator
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Generate personalized quizzes on any topic</p>
+        </div>
+
+        <div className="rounded-2xl shadow-xl p-8 mb-6" style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          borderColor: 'var(--color-border-primary)',
+          borderWidth: '1px'
+        }}>
+          <div className="flex items-center gap-3 mb-6">
+            <Sparkles className="text-purple-600" size={32} />
+            <div>
+              <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Create New Quiz</h3>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Enter a topic to generate questions</p>
+            </div>
+          </div>
+
+          <input
+            type="text"
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && topic.trim() && generateAIQuiz(topic)}
+            placeholder="e.g., Data Structures, Machine Learning, Physics"
+            className="w-full px-6 py-4 border-2 rounded-xl focus:border-blue-500 focus:outline-none text-lg mb-4"
+            style={{
+              backgroundColor: 'var(--color-bg-secondary)',
+              borderColor: 'var(--color-border-primary)',
+              color: 'var(--color-text-primary)'
+            }}
+          />
+
+          <button
+            onClick={() => generateAIQuiz(topic)}
+            disabled={!topic.trim()}
+            className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold flex items-center justify-center gap-2"
+          >
+            <Plus size={20} />
+            Generate Quiz
+          </button>
+        </div>
+
+        {quizHistory.length > 0 && (
+          <div className="rounded-2xl shadow-xl p-6" style={{
+            backgroundColor: 'var(--color-bg-primary)',
+            borderColor: 'var(--color-border-primary)',
+            borderWidth: '1px'
+          }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <History size={24} style={{ color: 'var(--color-text-primary)' }} />
+                <h3 className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>Quiz History</h3>
+              </div>
+              <div className="text-right">
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Average Accuracy</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{calculateAverageAccuracy()}%</p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {quizHistory.slice(0, 5).map(entry => (
+                <div key={entry.id} className="p-3 rounded-lg flex items-center justify-between" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                  <div>
+                    <p className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{entry.topic}</p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                      {new Date(entry.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`text-lg font-bold ${entry.percentage >= 70 ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {entry.percentage}%
+                    </p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                      {entry.score}/{entry.total}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    )
   }
 
   if (loading) {
@@ -132,14 +314,22 @@ export default function QuizView({ contentId, competencyId }) {
             You got {score} out of {quiz.questions.length} questions correct
           </p>
           {percentage >= 70 ? (
-            <div className="bg-green-100 text-green-800 px-6 py-3 rounded-xl inline-block font-semibold">
+            <div className="bg-green-100 text-green-800 px-6 py-3 rounded-xl inline-block font-semibold mb-6">
               ✓ Great job! Keep learning!
             </div>
           ) : (
-            <div className="bg-yellow-100 text-yellow-800 px-6 py-3 rounded-xl inline-block font-semibold">
+            <div className="bg-yellow-100 text-yellow-800 px-6 py-3 rounded-xl inline-block font-semibold mb-6">
               Keep practicing to improve!
             </div>
           )}
+          <div className="mt-6">
+            <button
+              onClick={resetQuiz}
+              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+            >
+              Take Another Quiz
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -147,11 +337,20 @@ export default function QuizView({ contentId, competencyId }) {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-          Knowledge Check
-        </h2>
-        <p style={{ color: 'var(--color-text-secondary)' }}>Test your understanding of {competencyId}</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            {topic}
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Test your understanding</p>
+        </div>
+        <button
+          onClick={resetQuiz}
+          className="px-4 py-2 rounded-lg hover:bg-gray-100 transition-all text-sm"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
+          Change Topic
+        </button>
       </div>
 
       <div className="rounded-2xl shadow-xl p-8" style={{

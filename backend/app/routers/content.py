@@ -62,12 +62,15 @@ async def upload_content(
         logger.info(f"Content saved to database: {content_id}")
         
         return {
-            "id": content_id,
-            "filename": file.filename,
-            "type": file.content_type,
-            "extractedText": extracted_text[:500] if extracted_text else "No text extracted",
-            "fileUrl": f"/uploads/{saved_filename}",
-            "timestamp": content.created_at.isoformat()
+            "success": True,
+            "data": {
+                "id": content_id,
+                "filename": file.filename,
+                "type": file.content_type,
+                "extractedText": extracted_text[:500] if extracted_text else "No text extracted",
+                "fileUrl": f"/uploads/{saved_filename}",
+                "timestamp": content.created_at.isoformat()
+            }
         }
     except HTTPException:
         raise
@@ -79,16 +82,19 @@ async def upload_content(
 def list_content(user_id: str = "default_user", db: Session = Depends(get_db)):
     contents = db.query(Content).filter(Content.user_id == user_id).all()
     return {
-        "contents": [
-            {
-                "id": c.id,
-                "filename": c.filename,
-                "type": c.content_type,
-                "fileUrl": c.file_url,
-                "timestamp": c.created_at.isoformat()
-            }
-            for c in contents
-        ]
+        "success": True,
+        "data": {
+            "contents": [
+                {
+                    "id": c.id,
+                    "filename": c.filename,
+                    "type": c.content_type,
+                    "fileUrl": c.file_url,
+                    "timestamp": c.created_at.isoformat()
+                }
+                for c in contents
+            ]
+        }
     }
 
 @router.get("/{content_id}")
@@ -98,10 +104,13 @@ def get_content(content_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Content not found")
     
     return {
-        "id": content.id,
-        "filename": content.filename,
-        "type": content.content_type,
-        "fileUrl": content.file_url,
-        "extractedText": content.extracted_text,
-        "timestamp": content.created_at.isoformat()
+        "success": True,
+        "data": {
+            "id": content.id,
+            "filename": content.filename,
+            "type": content.content_type,
+            "fileUrl": content.file_url,
+            "extractedText": content.extracted_text,
+            "timestamp": content.created_at.isoformat()
+        }
     }

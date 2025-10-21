@@ -49,9 +49,12 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     token = create_access_token(data={"sub": user_id, "email": email, "role": request.role})
     
     return {
-        "userId": user_id,
-        "token": token,
-        "role": request.role
+        "success": True,
+        "data": {
+            "userId": user_id,
+            "token": token,
+            "role": request.role
+        }
     }
 
 @router.post("/login")
@@ -73,9 +76,12 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     logger.info(f"Login successful: {user.id}")
     
     return {
-        "userId": user.id,
-        "token": token,
-        "role": user.role
+        "success": True,
+        "data": {
+            "userId": user.id,
+            "token": token,
+            "role": user.role
+        }
     }
 
 @router.get("/me")
@@ -92,7 +98,10 @@ def get_current_user(authorization: str = Header(None), db: Session = Depends(ge
         raise HTTPException(status_code=404, detail="User not found")
     
     return {
-        "userId": user.id,
-        "email": user.email,
-        "role": user.role
+        "success": True,
+        "data": {
+            "userId": user.id,
+            "email": user.email,
+            "role": user.role
+        }
     }

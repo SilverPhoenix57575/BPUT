@@ -36,29 +36,37 @@ api.interceptors.response.use(
   }
 )
 
+// Response unwrapper
+const unwrapResponse = (response) => {
+  if (response.data?.success && response.data?.data !== undefined) {
+    return { ...response, data: response.data.data }
+  }
+  return response
+}
+
 export const contentAPI = {
   upload: (formData) => api.post(ENDPOINTS.CONTENT.UPLOAD, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
-  }),
-  list: (userId) => api.get(`${ENDPOINTS.CONTENT.LIST}?userId=${userId}`),
-  get: (id) => api.get(ENDPOINTS.CONTENT.GET(id))
+  }).then(unwrapResponse),
+  list: (userId) => api.get(`${ENDPOINTS.CONTENT.LIST}?userId=${userId}`).then(unwrapResponse),
+  get: (id) => api.get(ENDPOINTS.CONTENT.GET(id)).then(unwrapResponse)
 }
 
 export const aiAPI = {
-  enhance: (text, level) => api.post(ENDPOINTS.AI.ENHANCE, { text, level }),
-  question: (data) => api.post(ENDPOINTS.AI.QUESTION, data),
+  enhance: (text, level) => api.post(ENDPOINTS.AI.ENHANCE, { text, level }).then(unwrapResponse),
+  question: (data) => api.post(ENDPOINTS.AI.QUESTION, data).then(unwrapResponse),
   quiz: (contentId, competencyId, numQuestions) => 
-    api.post(ENDPOINTS.AI.QUIZ, { contentId, competencyId, numQuestions })
+    api.post(ENDPOINTS.AI.QUIZ, { contentId, competencyId, numQuestions }).then(unwrapResponse)
 }
 
 export const progressAPI = {
   save: (userId, competencyId, interactions) => 
-    api.post(ENDPOINTS.PROGRESS.SAVE, { userId, competencyId, interactions }),
-  get: (userId) => api.get(ENDPOINTS.PROGRESS.GET(userId))
+    api.post(ENDPOINTS.PROGRESS.SAVE, { userId, competencyId, interactions }).then(unwrapResponse),
+  get: (userId) => api.get(ENDPOINTS.PROGRESS.GET(userId)).then(unwrapResponse)
 }
 
 export const careerAPI = {
-  recommendations: (userId) => api.get(`${ENDPOINTS.CAREER.RECOMMENDATIONS}?userId=${userId}`)
+  recommendations: (userId) => api.get(`${ENDPOINTS.CAREER.RECOMMENDATIONS}?userId=${userId}`).then(unwrapResponse)
 }
 
 export default api

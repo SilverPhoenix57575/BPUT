@@ -4,34 +4,35 @@ export const API_CONFIG = {
   TIMEOUT: 30000, // 30 seconds
   RETRY_COUNT: 3,
   RETRY_DELAY: 1000, // 1 second
+  API_VERSION: 'v1',
 }
 
 export const ENDPOINTS = {
   AUTH: {
-    SIGNUP: '/api/auth/signup',
-    LOGIN: '/api/auth/login',
-    ME: '/api/auth/me',
+    SIGNUP: '/api/v1/auth/signup',
+    LOGIN: '/api/v1/auth/login',
+    ME: '/api/v1/auth/me',
   },
   CONTENT: {
-    UPLOAD: '/api/content/upload',
-    LIST: '/api/content/list',
-    GET: (id) => `/api/content/${id}`,
+    UPLOAD: '/api/v1/content/upload',
+    LIST: '/api/v1/content/list',
+    GET: (id) => `/api/v1/content/${id}`,
   },
   AI: {
-    ENHANCE: '/api/ai/enhance',
-    QUESTION: '/api/ai/question',
-    QUIZ: '/api/ai/quiz',
-    FEEDBACK: '/api/ai/feedback',
-    SIMPLIFY: '/api/ai/simplify',
+    ENHANCE: '/api/v1/ai/enhance',
+    QUESTION: '/api/v1/ai/question',
+    QUIZ: '/api/v1/ai/quiz',
+    FEEDBACK: '/api/v1/ai/feedback',
+    SIMPLIFY: '/api/v1/ai/simplify',
   },
   PROGRESS: {
-    SAVE: '/api/progress/save',
-    GET: (userId) => `/api/progress/${userId}`,
+    SAVE: '/api/v1/progress/save',
+    GET: (userId) => `/api/v1/progress/${userId}`,
   },
   CAREER: {
-    RECOMMENDATIONS: '/api/career/recommendations',
+    RECOMMENDATIONS: '/api/v1/career/recommendations',
   },
   ANALYTICS: {
-    GET: (userId) => `/api/analytics/${userId}`,
+    GET: (userId) => `/api/v1/analytics/${userId}`,
   },
 }

@@ -42,8 +42,10 @@ async def enhance_content(request: EnhanceRequest):
         enhanced = await ai_service.enhance_content(text, request.level)
         logger.info("Content enhanced successfully")
         return {
-            "enhancedText": enhanced,
-            "readabilityScore": 8.5
+            "success": True,
+            "data": {
+                "enhancedText": enhanced
+            }
         }
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")
@@ -66,9 +68,10 @@ async def ask_question(request: QuestionRequest):
         answer = await ai_service.answer_question(question, request.contentId, request.chatHistory)
         logger.info("Question answered successfully")
         return {
-            "answer": answer,
-            "citations": [{"source": "AI Assistant", "page": 1}],
-            "confidence": 0.92
+            "success": True,
+            "data": {
+                "answer": answer
+            }
         }
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")
@@ -83,7 +86,12 @@ async def generate_quiz(request: QuizRequest):
         logger.info(f"Generating {request.numQuestions} questions for competency: {request.competencyId}")
         questions = await ai_service.generate_quiz(request.contentId, request.numQuestions)
         logger.info("Quiz generated successfully")
-        return {"questions": questions}
+        return {
+            "success": True,
+            "data": {
+                "questions": questions
+            }
+        }
     except ValueError as e:
         logger.error(f"Validation error: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Invalid quiz request: {str(e)}")
@@ -95,7 +103,10 @@ async def generate_quiz(request: QuizRequest):
 async def generate_feedback(answer: str, question: str):
     try:
         feedback = await ai_service.generate_feedback(answer, question)
-        return {"feedback": feedback}
+        return {
+            "success": True,
+            "data": {"feedback": feedback}
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -103,6 +114,9 @@ async def generate_feedback(answer: str, question: str):
 async def simplify_content(text: str):
     try:
         simplified = await ai_service.simplify_content(text)
-        return {"simplifiedText": simplified}
+        return {
+            "success": True,
+            "data": {"simplifiedText": simplified}
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

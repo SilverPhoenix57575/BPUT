@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: database-backup
+spec:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backup
+            image: alpine:latest
+            command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache gzip
+              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+              cp /data/app.db /backups/backup_${TIMESTAMP}.db
+              gzip /backups/backup_${TIMESTAMP}.db
+              find /backups -name "backup_*.db.gz" -mtime +7 -delete
+              echo "Backup completed: backup_${TIMESTAMP}.db.gz"
+            volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: backups
+              mountPath: /backups
+          restartPolicy: OnFailure
+          volumes:
+          - name: data
+            persistentVolumeClaim:
+              claimName: backend-pvc
+          - name: backups
+            persistentVolumeClaim:
+              claimName: backup-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: backup-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

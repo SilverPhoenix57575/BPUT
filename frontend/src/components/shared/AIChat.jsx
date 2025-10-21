@@ -14,10 +14,7 @@ export default function AIChat() {
   ])
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
-<<<<<<< HEAD
-=======
   const [responseType, setResponseType] = useState('medium')
->>>>>>> b9d7b41fbc73f3f983bd98e997165544199e3c6b
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeView, setActiveView] = useState('chats')
@@ -25,12 +22,6 @@ export default function AIChat() {
   const [projects, setProjects] = useState([])
   const [showProjectModal, setShowProjectModal] = useState(false)
   const [activeProject, setActiveProject] = useState(null)
-<<<<<<< HEAD
-=======
-  const [pomodoroTime, setPomodoroTime] = useState(25 * 60)
-  const [pomodoroRunning, setPomodoroRunning] = useState(false)
-  const [pomodoroMode, setPomodoroMode] = useState('work')
->>>>>>> b9d7b41fbc73f3f983bd98e997165544199e3c6b
   const user = useUserStore(state => state.user)
 
   useEffect(() => {
@@ -488,16 +479,6 @@ export default function AIChat() {
       )}
 
       <div className="flex-1 flex flex-col">
-<<<<<<< HEAD
-        {activeProject ? (
-          <div className="mb-4 p-4 rounded-xl flex items-center justify-between" style={{
-            backgroundColor: 'var(--color-bg-primary)',
-            borderColor: 'var(--color-border-primary)',
-            borderWidth: '1px'
-          }}>
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">{activeProject.icon}</span>
-=======
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {activeProject && (
@@ -524,7 +505,6 @@ export default function AIChat() {
               </>
             )}
             {!activeProject && (
->>>>>>> b9d7b41fbc73f3f983bd98e997165544199e3c6b
               <div>
                 <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
                   AI Learning Assistant
@@ -533,17 +513,6 @@ export default function AIChat() {
               </div>
             )}
           </div>
-<<<<<<< HEAD
-        ) : (
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-              AI Learning Assistant
-            </h2>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Ask questions and get detailed answers</p>
-          </div>
-        )}
-
-=======
           
           <div className="flex gap-2">
             {[
@@ -572,7 +541,6 @@ export default function AIChat() {
             ))}
           </div>
         </div>
->>>>>>> b9d7b41fbc73f3f983bd98e997165544199e3c6b
 
         <div className="flex-1 rounded-2xl shadow-lg p-6 flex flex-col" style={{
         backgroundColor: 'var(--color-bg-primary)',

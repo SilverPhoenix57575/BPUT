@@ -14,9 +14,7 @@ export default function AIChat() {
   ])
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
-<<<<<<< HEAD
   const [responseType, setResponseType] = useState('medium')
-=======
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeView, setActiveView] = useState('chats')
@@ -24,7 +22,9 @@ export default function AIChat() {
   const [projects, setProjects] = useState([])
   const [showProjectModal, setShowProjectModal] = useState(false)
   const [activeProject, setActiveProject] = useState(null)
->>>>>>> ff5940f73e51dbfe86b6f79a5c7aebfc832952bc
+  const [pomodoroTime, setPomodoroTime] = useState(25 * 60)
+  const [pomodoroRunning, setPomodoroRunning] = useState(false)
+  const [pomodoroMode, setPomodoroMode] = useState('work')
   const user = useUserStore(state => state.user)
 
   useEffect(() => {
@@ -55,12 +55,24 @@ export default function AIChat() {
     setProjects(updated)
     localStorage.setItem('chatProjects', JSON.stringify(updated))
     setActiveProject(project)
-    createNewChat()
+    setActiveView('chats')
   }
 
   const selectProject = (project) => {
-    setActiveProject(project)
-    createNewChat()
+    if (activeProject?.id === project.id) {
+      setActiveProject(null)
+    } else {
+      setActiveProject(project)
+    }
+  }
+
+  const deleteProject = (projectId) => {
+    const filtered = projects.filter(p => p.id !== projectId)
+    setProjects(filtered)
+    localStorage.setItem('chatProjects', JSON.stringify(filtered))
+    if (activeProject?.id === projectId) {
+      setActiveProject(null)
+    }
   }
 
   const saveToLibrary = () => {
@@ -126,7 +138,7 @@ export default function AIChat() {
       id: currentSessionId,
       title,
       messages,
-      projectId: activeProject?.id || null,
+      projectId: activeProject?.id,
       timestamp: new Date().toISOString()
     }
 
@@ -147,7 +159,6 @@ export default function AIChat() {
       ? `Hi! I'm your AI assistant for ${activeProject.name}. How can I help you today?`
       : 'Hi! I\'m your AI learning assistant. Ask me anything!'
     setMessages([{ role: 'assistant', content: welcomeMsg }])
-    setActiveView('chats')
   }
 
   const loadSession = (sessionId) => {
@@ -206,17 +217,19 @@ export default function AIChat() {
     }
   }
 
-  const filteredChats = chatSessions.filter(s => 
-    s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.messages.some(m => m.content.toLowerCase().includes(searchQuery.toLowerCase()))
-  )
+  const filteredChats = chatSessions.filter(s => {
+    if (!searchQuery.trim()) return true
+    const query = searchQuery.toLowerCase()
+    return s.title.toLowerCase().includes(query) ||
+      s.messages.some(m => m.content.toLowerCase().includes(query))
+  })
 
   return (
     <div className="flex h-[calc(100vh-120px)] gap-4 px-6">
       {!sidebarCollapsed && (
       <div className="w-72 flex-shrink-0 rounded-2xl shadow-lg p-4" style={{
-        backgroundColor: '#1a1a1a',
-        borderColor: '#333',
+        backgroundColor: 'var(--color-bg-primary)',
+        borderColor: 'var(--color-border-primary)',
         borderWidth: '1px'
       }}>
         <div className="flex items-center justify-between mb-4">
@@ -224,11 +237,14 @@ export default function AIChat() {
             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
               <Sparkles size={16} className="text-white" />
             </div>
-            <span className="font-bold text-white">AI Chat</span>
+            <span className="font-bold" style={{ color: 'var(--color-text-primary)' }}>AI Chat</span>
           </div>
           <button
             onClick={() => setSidebarCollapsed(true)}
-            className="p-1 rounded hover:bg-gray-800 text-gray-400"
+            className="p-1 rounded transition-all"
+            style={{ color: 'var(--color-text-secondary)' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <ChevronLeft size={20} />
           </button>
@@ -249,17 +265,36 @@ export default function AIChat() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search chats..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:border-blue-500 bg-gray-900 border-gray-700 text-white placeholder-gray-500"
+            className="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:border-blue-500"
+            style={{
+              backgroundColor: 'var(--color-bg-secondary)',
+              borderColor: 'var(--color-border-primary)',
+              color: 'var(--color-text-primary)'
+            }}
           />
         </div>
 
-        <div className="space-y-2 mb-4">
+        <div className="flex gap-1 mb-4">
+          <button
+            onClick={() => setActiveView('chats')}
+            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg transition-all font-medium text-xs"
+            style={{
+              backgroundColor: activeView === 'chats' ? 'var(--color-bg-tertiary)' : 'transparent',
+              color: 'var(--color-text-primary)'
+            }}
+          >
+            <MessageSquare size={14} />
+            <span>Chats</span>
+          </button>
           <button
             onClick={() => setActiveView('library')}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-white hover:bg-gray-800"
-            style={{ backgroundColor: activeView === 'library' ? '#374151' : 'transparent' }}
+            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg transition-all font-medium text-xs"
+            style={{
+              backgroundColor: activeView === 'library' ? 'var(--color-bg-tertiary)' : 'transparent',
+              color: 'var(--color-text-primary)'
+            }}
           >
-            <BookMarked size={18} />
+            <BookMarked size={14} />
             <span>Library</span>
           </button>
           <button
@@ -270,27 +305,36 @@ export default function AIChat() {
                 setActiveView('projects')
               }
             }}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-all text-white hover:bg-gray-800"
-            style={{ backgroundColor: activeView === 'projects' ? '#374151' : 'transparent' }}
+            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg transition-all font-medium text-xs"
+            style={{
+              backgroundColor: activeView === 'projects' ? 'var(--color-bg-tertiary)' : 'transparent',
+              color: 'var(--color-text-primary)'
+            }}
           >
-            <FolderOpen size={18} />
+            <FolderOpen size={14} />
             <span>Projects</span>
           </button>
         </div>
 
-        <div className="border-t border-gray-700 pt-3 mb-3"></div>
-
-        <div className="space-y-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 420px)' }}>
-          {activeView === 'chats' && filteredChats.map((session) => (
+        <div className="space-y-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 380px)' }}>
+          {activeView === 'chats' && (
+            <>
+              {filteredChats.length === 0 && searchQuery && (
+                <div className="text-center py-8">
+                  <Search size={48} className="mx-auto mb-3 opacity-30" style={{ color: 'var(--color-text-tertiary)' }} />
+                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>No chats found</p>
+                </div>
+              )}
+              {filteredChats.filter(s => activeProject ? s.projectId === activeProject.id : !s.projectId).map((session) => (
             <div key={session.id} className="group relative">
               <button
                 onClick={() => loadSession(session.id)}
                 className="w-full text-left px-3 py-2 rounded-lg transition-all"
                 style={{
-                  backgroundColor: currentSessionId === session.id ? '#374151' : 'transparent',
-                  color: '#fff'
+                  backgroundColor: currentSessionId === session.id ? 'var(--color-bg-tertiary)' : 'transparent',
+                  color: 'var(--color-text-primary)'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#374151'}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'}
                 onMouseLeave={(e) => {
                   if (currentSessionId !== session.id) {
                     e.currentTarget.style.backgroundColor = 'transparent'
@@ -301,7 +345,7 @@ export default function AIChat() {
                   <MessageSquare size={16} className="mt-1 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm truncate">{session.title}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                       {new Date(session.timestamp).toLocaleDateString()}
                     </p>
                   </div>
@@ -319,29 +363,47 @@ export default function AIChat() {
               </button>
             </div>
           ))}
+            </>
+          )}
 
           {activeView === 'library' && (
             <div>
-              <button
-                onClick={saveToLibrary}
-                className="w-full px-3 py-2 mb-2 rounded-lg border-2 border-dashed border-gray-700 text-gray-400 text-sm hover:border-gray-500"
-              >
-                Save Current Chat
-              </button>
+              {messages.length > 1 && (
+                <button
+                  onClick={saveToLibrary}
+                  className="w-full px-3 py-2 mb-3 rounded-lg border-2 border-dashed text-sm transition-all hover:border-blue-500"
+                  style={{
+                    borderColor: 'var(--color-border-primary)',
+                    color: 'var(--color-text-secondary)'
+                  }}
+                >
+                  💾 Save Current Chat
+                </button>
+              )}
+              {library.length === 0 && (
+                <div className="text-center py-8">
+                  <BookMarked size={48} className="mx-auto mb-3 opacity-30" style={{ color: 'var(--color-text-tertiary)' }} />
+                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>No saved chats yet</p>
+                </div>
+              )}
               {library.map((item) => (
                 <div key={item.id} className="group relative">
                   <button
                     onClick={() => {
                       setMessages(item.messages)
+                      setCurrentSessionId(null)
                       setActiveView('chats')
                     }}
-                    className="w-full text-left px-3 py-2 rounded-lg transition-all text-white hover:bg-gray-800"
+                    className="w-full text-left px-3 py-2 rounded-lg transition-all"
+                    style={{ color: 'var(--color-text-primary)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <div className="flex items-start gap-2">
-                      <BookMarked size={16} className="mt-1 flex-shrink-0" />
+                      <BookMarked size={16} className="mt-1 flex-shrink-0" style={{ color: '#3b82f6' }} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm truncate">{item.title}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm truncate font-medium">{item.title}</p>
+                        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
                           {new Date(item.timestamp).toLocaleDateString()}
                         </p>
                       </div>
@@ -356,25 +418,48 @@ export default function AIChat() {
             <div>
               <button
                 onClick={() => setShowProjectModal(true)}
-                className="w-full px-3 py-2 mb-2 rounded-lg border-2 border-dashed border-gray-700 text-gray-400 text-sm hover:border-gray-500"
+                className="w-full px-3 py-2 mb-3 rounded-lg border-2 border-dashed text-sm transition-all hover:border-blue-500"
+                style={{
+                  borderColor: 'var(--color-border-primary)',
+                  color: 'var(--color-text-secondary)'
+                }}
               >
                 <Plus size={16} className="inline mr-2" />
                 New Project
               </button>
+              {projects.length === 0 && (
+                <div className="text-center py-8">
+                  <FolderOpen size={48} className="mx-auto mb-3 opacity-30" style={{ color: 'var(--color-text-tertiary)' }} />
+                  <p className="text-sm" style={{ color: 'var(--color-text-tertiary)' }}>No projects yet</p>
+                </div>
+              )}
               {projects.map((project) => (
-                <button
-                  key={project.id}
-                  onClick={() => selectProject(project)}
-                  className="w-full px-3 py-2 mb-2 rounded-lg transition-all text-white"
-                  style={{
-                    backgroundColor: activeProject?.id === project.id ? '#2563eb' : '#374151'
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{project.icon}</span>
-                    <span className="font-semibold text-sm">{project.name}</span>
-                  </div>
-                </button>
+                <div key={project.id} className="group relative mb-2">
+                  <button
+                    onClick={() => selectProject(project)}
+                    className="w-full px-3 py-2.5 rounded-lg transition-all hover:scale-102"
+                    style={{
+                      backgroundColor: activeProject?.id === project.id ? '#3b82f6' : 'var(--color-bg-tertiary)',
+                      color: activeProject?.id === project.id ? 'white' : 'var(--color-text-primary)',
+                      border: activeProject?.id === project.id ? '2px solid #60a5fa' : '2px solid transparent'
+                    }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{project.icon}</span>
+                      <span className="font-semibold text-sm truncate">{project.name}</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteProject(project.id)
+                    }}
+                    className="absolute right-2 top-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100"
+                    style={{ color: '#ef4444' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -385,49 +470,53 @@ export default function AIChat() {
       {sidebarCollapsed && (
         <button
           onClick={() => setSidebarCollapsed(false)}
-          className="fixed left-4 top-24 p-2 rounded-lg bg-gray-800 text-white hover:bg-gray-700 z-50"
+          className="fixed left-4 top-24 p-2 rounded-lg z-50 transition-all"
+          style={{
+            backgroundColor: 'var(--color-bg-secondary)',
+            color: 'var(--color-text-primary)'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-secondary)'}
         >
           <ChevronRight size={20} />
         </button>
       )}
 
       <div className="flex-1 flex flex-col">
-<<<<<<< HEAD
         <div className="mb-4 flex items-center justify-between">
-          <div>
-=======
-        {activeProject ? (
-          <div className="mb-4 p-4 rounded-xl flex items-center justify-between" style={{
-            backgroundColor: 'var(--color-bg-primary)',
-            borderColor: 'var(--color-border-primary)',
-            borderWidth: '1px'
-          }}>
-            <div className="flex items-center gap-3">
-              <span className="text-3xl">{activeProject.icon}</span>
+          <div className="flex items-center gap-3">
+            {activeProject && (
+              <>
+                <span className="text-3xl">{activeProject.icon}</span>
+                <div className="flex items-center gap-2">
+                  <div>
+                    <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+                      {activeProject.name}
+                    </h2>
+                    <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Project workspace</p>
+                  </div>
+                  <button
+                    onClick={() => setActiveProject(null)}
+                    className="ml-2 px-3 py-1 rounded-lg text-xs font-medium transition-all"
+                    style={{
+                      backgroundColor: 'var(--color-bg-tertiary)',
+                      color: 'var(--color-text-secondary)'
+                    }}
+                  >
+                    Exit Project
+                  </button>
+                </div>
+              </>
+            )}
+            {!activeProject && (
               <div>
                 <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-                  {activeProject.name}
+                  AI Learning Assistant
                 </h2>
-                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  Project workspace
-                </p>
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Ask questions and get detailed answers</p>
               </div>
-            </div>
-            <button
-              className="px-4 py-2 rounded-lg font-medium transition-all bg-gray-700 text-white hover:bg-gray-600"
-            >
-              📎 Add files
-            </button>
+            )}
           </div>
-        ) : (
-          <div className="mb-4">
->>>>>>> ff5940f73e51dbfe86b6f79a5c7aebfc832952bc
-            <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-              AI Learning Assistant
-            </h2>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Ask questions and get detailed answers</p>
-          </div>
-<<<<<<< HEAD
           
           <div className="flex gap-2">
             {[
@@ -456,9 +545,6 @@ export default function AIChat() {
             ))}
           </div>
         </div>
-=======
-        )}
->>>>>>> ff5940f73e51dbfe86b6f79a5c7aebfc832952bc
 
         <div className="flex-1 rounded-2xl shadow-lg p-6 flex flex-col" style={{
         backgroundColor: 'var(--color-bg-primary)',

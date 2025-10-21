@@ -67,3 +67,44 @@ class Achievement(Base):
     badge_id = Column(String, index=True)
     badge_name = Column(String)
     earned_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+class PomodoroSettings(Base):
+    __tablename__ = "pomodoro_settings"
+    __table_args__ = (
+        {'sqlite_autoincrement': True},
+    )
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"), unique=True, index=True)
+    work_duration = Column(Integer, default=25)
+    short_break = Column(Integer, default=5)
+    long_break = Column(Integer, default=15)
+    sessions_until_long_break = Column(Integer, default=4)
+    auto_start_breaks = Column(Integer, default=0)
+    auto_start_pomodoros = Column(Integer, default=0)
+    updated_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+class PomodoroSession(Base):
+    __tablename__ = "pomodoro_sessions"
+    __table_args__ = (
+        {'sqlite_autoincrement': True},
+    )
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    duration = Column(Integer)
+    completed = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+class MindMap(Base):
+    __tablename__ = "mindmaps"
+    __table_args__ = (
+        {'sqlite_autoincrement': True},
+    )
+    
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"), index=True)
+    title = Column(String)
+    data = Column(JSON)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    updated_at = Column(DateTime, default=datetime.utcnow, index=True)

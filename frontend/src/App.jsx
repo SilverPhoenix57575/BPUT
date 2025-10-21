@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Sparkles, Brain, Target, Zap, LogOut, ClipboardCheck, User, BarChart, Library, MessageSquare } from 'lucide-react'
+import { Sparkles, Brain, Target, Zap, LogOut, ClipboardCheck, User, BarChart, Library, MessageSquare, Briefcase } from 'lucide-react'
 import SignIn from './components/auth/SignIn'
 import SignUp from './components/auth/SignUp'
 import QuizView from './components/student/QuizView'
 import Profile from './components/student/Profile'
+import CareerMapping from './components/student/CareerMapping'
 import KnowledgeHub from './components/hub/KnowledgeHub'
 import AIChat from './components/shared/AIChat'
 import ThemeToggle from './components/shared/ThemeToggle'
@@ -69,6 +70,8 @@ function App() {
         return <QuizView contentId={currentContent?.id || 'demo'} competencyId="cs_001" />
       case 'profile':
         return <Profile />
+      case 'career':
+        return <CareerMapping />
       default:
         return <HomePage onNavigate={setActiveView} />
     }
@@ -97,6 +100,7 @@ function App() {
             <div className="flex items-center gap-2">
               <NavButton icon={MessageSquare} label="AI Chat" active={activeView === 'chat'} onClick={() => setActiveView('chat')} />
               <NavButton icon={Library} label="Knowledge Hub" active={activeView === 'hub'} onClick={() => setActiveView('hub')} />
+              <NavButton icon={Briefcase} label="Career" active={activeView === 'career'} onClick={() => setActiveView('career')} />
               <NavButton icon={ClipboardCheck} label="Quiz" active={activeView === 'quiz'} onClick={() => setActiveView('quiz')} />
               <NavButton icon={User} label="Profile" active={activeView === 'profile'} onClick={() => setActiveView('profile')} />
               <ThemeToggle />
@@ -169,11 +173,11 @@ function HomePage({ onNavigate }) {
           onClick={() => onNavigate('chat')}
         />
         <ActionCard
-          icon={User}
-          title="View Profile"
-          description="Track progress, quests, and achievements"
-          gradient="from-green-600 to-emerald-700"
-          onClick={() => onNavigate('profile')}
+          icon={Briefcase}
+          title="Career Mapping"
+          description="Discover careers that match your skills"
+          gradient="from-purple-600 to-pink-700"
+          onClick={() => onNavigate('career')}
         />
       </div>
 

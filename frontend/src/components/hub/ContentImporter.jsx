@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Upload, Link as LinkIcon, FileText, X, Sparkles, Tag, Save, Library as LibraryIcon } from 'lucide-react'
 import { contentAPI, aiAPI } from '../../services/api'
 import useUserStore from '../../stores/userStore'
+import { logStudySession } from '../../services/analytics'
 
 export default function ContentImporter({ onClose, onSave }) {
   const [step, setStep] = useState('choose')
@@ -103,6 +104,10 @@ export default function ContentImporter({ onClose, onSave }) {
 
   const handleSave = (destination) => {
     onSave({ ...smartNote, destination })
+    // Log note creation
+    if (user) {
+      logStudySession(user.id, 'note', smartNote.title, 60) // Assume 1 min for note creation
+    }
     onClose()
   }
 

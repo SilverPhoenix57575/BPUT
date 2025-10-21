@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .database import engine, Base
-from .routers import content, ai, auth, educator, career, progress
+from .routers import content, ai, auth, educator, career, progress, analytics
 import os
 import logging
 
@@ -36,6 +36,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(educator.router, prefix="/api/educator", tags=["educator"])
 app.include_router(career.router, prefix="/api/career", tags=["career"])
 app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
+app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 
 uploads_dir = "uploads"
 if not os.path.exists(uploads_dir):

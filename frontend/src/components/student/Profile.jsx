@@ -1,17 +1,20 @@
 import { useState } from 'react'
-import { Mail, Calendar, Settings, TrendingUp, Flame, Award } from 'lucide-react'
+import { Mail, Calendar, Settings as SettingsIcon, TrendingUp, Flame, Award } from 'lucide-react'
 import useUserStore from '../../stores/userStore'
 import useProgressStore from '../../stores/progressStore'
 import useGamificationStore from '../../stores/gamificationStore'
 import ProgressDashboard from './ProgressDashboard'
 import QuestTracker from '../gamification/QuestTracker'
 import BadgeDisplay from '../gamification/BadgeDisplay'
+import Settings from './Settings'
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState('overview')
   const user = useUserStore(state => state.user)
   const { quizzesTaken, masteredCompetencies, totalTimeSpent } = useProgressStore()
   const { xp, level, streak, achievements, dailyQuests } = useGamificationStore()
+  
+  const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
   
   const xpForNextLevel = level * 100
   const xpProgress = (xp / xpForNextLevel) * 100
@@ -40,7 +43,7 @@ export default function Profile() {
               </div>
               <div className="flex items-center gap-2">
                 <Calendar size={16} />
-                <span>Joined {new Date().toLocaleDateString()}</span>
+                <span>Joined {joinDate}</span>
               </div>
             </div>
           </div>
@@ -144,6 +147,11 @@ export default function Profile() {
             active={activeTab === 'leaderboard'}
             onClick={() => setActiveTab('leaderboard')}
           />
+          <TabButton
+            label="Settings"
+            active={activeTab === 'settings'}
+            onClick={() => setActiveTab('settings')}
+          />
         </div>
 
         <div className="p-6">
@@ -152,6 +160,7 @@ export default function Profile() {
           {activeTab === 'quests' && <QuestsTab dailyQuests={dailyQuests} />}
           {activeTab === 'achievements' && <AchievementsTab achievements={achievements} />}
           {activeTab === 'leaderboard' && <LeaderboardTab currentLevel={level} currentXP={xp} />}
+          {activeTab === 'settings' && <SettingsTab />}
         </div>
       </div>
     </div>
@@ -212,7 +221,7 @@ function OverviewTab({ user }) {
         </h3>
         <div className="flex gap-3">
           <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
-            <Settings size={18} />
+            <SettingsIcon size={18} />
             Edit Profile
           </button>
         </div>
@@ -324,6 +333,10 @@ function AchievementsTab({ achievements }) {
       </div>
     </div>
   )
+}
+
+function SettingsTab() {
+  return <Settings />
 }
 
 function LeaderboardTab({ currentLevel, currentXP }) {

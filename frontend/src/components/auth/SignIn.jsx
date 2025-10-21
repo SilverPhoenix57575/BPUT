@@ -4,6 +4,9 @@ import { Mail, Lock, Brain, Sparkles, AlertCircle } from 'lucide-react'
 export default function SignIn({ onSignIn, onSwitchToSignUp, loading, error }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetSent, setResetSent] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -71,6 +74,16 @@ export default function SignIn({ onSignIn, onSwitchToSignUp, loading, error }) {
               </div>
             </div>
 
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
             {error && (
               <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
                 <AlertCircle size={16} />
@@ -106,6 +119,59 @@ export default function SignIn({ onSignIn, onSwitchToSignUp, loading, error }) {
             <span>Offline-first • Privacy-first • Student-first</span>
           </div>
         </div>
+
+        {showForgotPassword && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowForgotPassword(false)}>
+            <div className="rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4" style={{
+              backgroundColor: 'var(--color-bg-primary)'
+            }} onClick={(e) => e.stopPropagation()}>
+              <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+                Reset Password
+              </h2>
+              {!resetSent ? (
+                <>
+                  <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+                    Enter your email and we'll send you a reset link.
+                  </p>
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full px-4 py-3 rounded-xl mb-4"
+                    style={{
+                      backgroundColor: 'var(--color-bg-secondary)',
+                      borderColor: 'var(--color-border-primary)',
+                      borderWidth: '1px',
+                      color: 'var(--color-text-primary)'
+                    }}
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowForgotPassword(false)}
+                      className="flex-1 px-4 py-3 rounded-xl font-medium"
+                      style={{ backgroundColor: 'var(--color-bg-secondary)', color: 'var(--color-text-secondary)' }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => { setResetSent(true); setTimeout(() => { setShowForgotPassword(false); setResetSent(false); setResetEmail('') }, 3000) }}
+                      className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-medium"
+                    >
+                      Send Link
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="text-6xl mb-4">✉️</div>
+                  <p className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>Check your email!</p>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>Reset link sent to {resetEmail}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

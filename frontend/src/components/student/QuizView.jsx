@@ -3,7 +3,9 @@ import { CheckCircle, XCircle, Award, ArrowRight, Sparkles, History, Plus } from
 import storage from '../../services/storage'
 import useProgressStore from '../../stores/progressStore'
 import useUserStore from '../../stores/userStore'
+import useAnalyticsStore from '../../stores/analyticsStore'
 import { aiAPI } from '../../services/api'
+import { logStudySession } from '../../services/analytics'
 
 const demoQuiz = {
   questions: [
@@ -60,6 +62,7 @@ export default function QuizView({ contentId, competencyId }) {
   const [showHistory, setShowHistory] = useState(false)
   const updateMastery = useProgressStore(state => state.updateMastery)
   const user = useUserStore(state => state.user)
+  const { startSession, endSession } = useAnalyticsStore()
 
   useEffect(() => {
     // Load quiz history from localStorage
@@ -70,6 +73,7 @@ export default function QuizView({ contentId, competencyId }) {
   const generateAIQuiz = async (quizTopic) => {
     setLoading(true)
     setShowTopicInput(false)
+    startSession('quiz', quizTopic)
     try {
       const prompt = `Generate 5 multiple-choice quiz questions about "${quizTopic}".
 
@@ -147,6 +151,12 @@ Make questions clear and educational.`
     if (currentQ === quiz.questions.length - 1) {
       const percentage = Math.round((score / quiz.questions.length) * 100)
       const mastery = score / quiz.questions.length
+      
+      // Log session
+      const duration = endSession()
+      if (user) {
+        logStudySession(user.id, 'quiz', topic, duration, percentage)
+      }
       
       // Save to quiz history
       const historyEntry = {

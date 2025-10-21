@@ -32,3 +32,23 @@ class Progress(Base):
     mastery_level = Column(Float, default=0.1)
     interactions = Column(JSON)
     updated_at = Column(DateTime, default=datetime.utcnow)
+
+class StudySession(Base):
+    __tablename__ = "study_sessions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"))
+    activity_type = Column(String)  # 'note', 'flashcard', 'quiz'
+    topic = Column(String)
+    duration = Column(Integer)  # seconds
+    score = Column(Float, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class Achievement(Base):
+    __tablename__ = "achievements"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"))
+    badge_id = Column(String)
+    badge_name = Column(String)
+    earned_at = Column(DateTime, default=datetime.utcnow)

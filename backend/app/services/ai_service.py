@@ -1,17 +1,18 @@
 import google.generativeai as genai
 from ..config import settings
 from ..cache import ai_cache
-import logging
+from ..constants import GEMINI_MODEL, MAX_CHAT_HISTORY
+from ..logger import setup_logger
 import asyncio
 from functools import partial
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
 class AIService:
     def __init__(self):
-        self.model = genai.GenerativeModel('gemini-2.0-flash')
+        self.model = genai.GenerativeModel(GEMINI_MODEL)
     
     async def enhance_content(self, text: str, level: str) -> str:
         prompt = f"""Simplify this content for a {level} level student. Make it clear and engaging:
@@ -27,7 +28,7 @@ Provide a simplified version that's easy to understand."""
         try:
             history_text = ""
             if chat_history:
-                for msg in chat_history[-6:]:
+                for msg in chat_history[-MAX_CHAT_HISTORY:]:
                     role = "User" if msg.get("role") == "user" else "Assistant"
                     history_text += f"{role}: {msg.get('content', '')}\n"
             

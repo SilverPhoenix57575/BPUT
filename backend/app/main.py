@@ -3,14 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .database import engine, Base
 from .routers import content, ai, auth, educator, career, progress, analytics
+from .constants import UPLOAD_DIR
+from .logger import setup_logger
 import os
-import logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 Base.metadata.create_all(bind=engine)
 
@@ -38,10 +35,9 @@ app.include_router(career.router, prefix="/api/career", tags=["career"])
 app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 
-uploads_dir = "uploads"
-if not os.path.exists(uploads_dir):
-    os.makedirs(uploads_dir)
-app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
 @app.get("/")
 def root():

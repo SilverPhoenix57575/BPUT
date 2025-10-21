@@ -11,7 +11,7 @@
 1. **IMMEDIATE**: Run `fix-security.bat` to remove sensitive files from Git
 2. Run `setup-security.bat` to generate secure keys
 3. Update `.env.docker` and `backend/.env` with your Gemini API key
-4. Read [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) for details
+4. Read [SECURITY_CHECKLIST.md](docs/setup/SECURITY_CHECKLIST.md) for details
 5. Run `python verify-security.py` to verify
 
 ---
@@ -65,10 +65,10 @@ npm run dev
 
 ## 📚 Documentation
 
+- **[📖 Documentation Index](docs/README.md)** - Complete documentation guide
 - **[Backend Setup](backend/README.md)** - Backend installation & API docs
 - **[Frontend Setup](frontend/README.md)** - Frontend installation & features
-- **[Docker Setup](deployment/docker/README.md)** - Docker Compose guide
-- **[Kubernetes Setup](deployment/kubernetes/README.md)** - K8s deployment guide
+- **[Docker Setup](docs/setup/To%20Run%20Application%20by%20docker.md)** - Docker Compose guide
 - **[API Documentation](docs/API.md)** - API endpoints reference
 
 ---
@@ -87,7 +87,7 @@ npm run dev
 
 ## 🔑 Environment Setup
 
-⚠️ **SECURITY FIRST**: Read [SECURITY_SETUP.md](SECURITY_SETUP.md) before proceeding!
+⚠️ **SECURITY FIRST**: Read [SECURITY_SETUP.md](docs/setup/SECURITY_SETUP.md) before proceeding!
 
 Create `.env.docker` in root:
 ```env

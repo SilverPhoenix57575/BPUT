@@ -2,19 +2,24 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional
 from ..services.ai_service import AIService
-import logging
+from ..validators import validate_text_length, sanitize_input
+from ..constants import (
+    MIN_QUESTION_LENGTH, MAX_TEXT_LENGTH, MIN_ENHANCE_TEXT_LENGTH,
+    MAX_ENHANCE_TEXT_LENGTH, MAX_QUIZ_QUESTIONS, DEFAULT_QUIZ_QUESTIONS
+)
+from ..logger import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 router = APIRouter()
 ai_service = AIService()
 
 class EnhanceRequest(BaseModel):
-    text: str = Field(..., min_length=10, max_length=10000)
+    text: str
     level: str = Field(default="beginner")
 
 class QuestionRequest(BaseModel):
-    question: str = Field(..., min_length=3, max_length=50000)
+    question: str
     contentId: Optional[str] = None
     userId: Optional[str] = None
     chatHistory: Optional[list] = None
@@ -22,13 +27,19 @@ class QuestionRequest(BaseModel):
 class QuizRequest(BaseModel):
     contentId: str
     competencyId: str
-    numQuestions: int = Field(default=5, ge=1, le=20)
+    numQuestions: int = Field(default=DEFAULT_QUIZ_QUESTIONS, ge=1, le=MAX_QUIZ_QUESTIONS)
 
 @router.post("/enhance")
 async def enhance_content(request: EnhanceRequest):
     try:
+        text = validate_text_length(
+            sanitize_input(request.text),
+            MIN_ENHANCE_TEXT_LENGTH,
+            MAX_ENHANCE_TEXT_LENGTH,
+            "Text"
+        )
         logger.info(f"Enhancing content for level: {request.level}")
-        enhanced = await ai_service.enhance_content(request.text, request.level)
+        enhanced = await ai_service.enhance_content(text, request.level)
         logger.info("Content enhanced successfully")
         return {
             "enhancedText": enhanced,
@@ -44,9 +55,15 @@ async def enhance_content(request: EnhanceRequest):
 @router.post("/question")
 async def ask_question(request: QuestionRequest):
     try:
-        logger.info(f"Received question: {request.question[:50]}... for user: {request.userId}")
+        question = validate_text_length(
+            sanitize_input(request.question),
+            MIN_QUESTION_LENGTH,
+            MAX_TEXT_LENGTH,
+            "Question"
+        )
+        logger.info(f"Received question: {question[:50]}... for user: {request.userId}")
         logger.info(f"ContentId: {request.contentId}")
-        answer = await ai_service.answer_question(request.question, request.contentId, request.chatHistory)
+        answer = await ai_service.answer_question(question, request.contentId, request.chatHistory)
         logger.info("Question answered successfully")
         return {
             "answer": answer,

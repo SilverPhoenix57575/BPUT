@@ -3,18 +3,16 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Content
 from ..services.content_processor import ContentProcessor
+from ..validators import validate_file_extension
+from ..constants import ALLOWED_EXTENSIONS, MAX_FILE_SIZE
+from ..logger import setup_logger
 from datetime import datetime
 import uuid
 import os
-import logging
 
-logger = logging.getLogger(__name__)
-
+logger = setup_logger(__name__)
 router = APIRouter()
 processor = ContentProcessor()
-
-ALLOWED_EXTENSIONS = {'.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg', '.txt'}
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 @router.post("/upload")
 async def upload_content(
@@ -25,16 +23,16 @@ async def upload_content(
     try:
         logger.info(f"Uploading file: {file.filename} for user: {user_id}")
         
-        file_ext = os.path.splitext(file.filename)[1].lower()
-        if file_ext not in ALLOWED_EXTENSIONS:
-            raise HTTPException(status_code=400, detail=f"File type {file_ext} not allowed. Allowed: {', '.join(ALLOWED_EXTENSIONS)}")
+        file_ext = validate_file_extension(file.filename)
         
         file_content = await file.read()
         
         if len(file_content) > MAX_FILE_SIZE:
+            logger.warning(f"File too large: {len(file_content)} bytes")
             raise HTTPException(status_code=400, detail=f"File too large. Max size: {MAX_FILE_SIZE // (1024*1024)}MB")
         
         if len(file_content) == 0:
+            logger.warning("Empty file uploaded")
             raise HTTPException(status_code=400, detail="Empty file uploaded")
         
         content_id = f"content_{uuid.uuid4().hex[:12]}"
@@ -74,7 +72,7 @@ async def upload_content(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Upload error: {str(e)}")
+        logger.error(f"Upload error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to upload file. Please try again.")
 
 @router.get("/list")

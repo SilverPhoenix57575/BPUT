@@ -1,9 +1,12 @@
 import axios from 'axios'
+import { API_CONFIG, ENDPOINTS } from '../config/api.config'
+import { validateEnv } from '../utils/envValidator'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const env = validateEnv()
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: env.apiUrl,
+  timeout: API_CONFIG.TIMEOUT,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -26,35 +29,36 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token')
-      window.location.href = '/'
+      localStorage.removeItem('user')
+      window.location.href = '/login'
     }
     return Promise.reject(error)
   }
 )
 
 export const contentAPI = {
-  upload: (formData) => api.post('/api/content/upload', formData, {
+  upload: (formData) => api.post(ENDPOINTS.CONTENT.UPLOAD, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  list: (userId) => api.get(`/api/content/list?userId=${userId}`),
-  get: (id) => api.get(`/api/content/${id}`)
+  list: (userId) => api.get(`${ENDPOINTS.CONTENT.LIST}?userId=${userId}`),
+  get: (id) => api.get(ENDPOINTS.CONTENT.GET(id))
 }
 
 export const aiAPI = {
-  enhance: (text, level) => api.post('/api/ai/enhance', { text, level }),
-  question: (data) => api.post('/api/ai/question', data),
+  enhance: (text, level) => api.post(ENDPOINTS.AI.ENHANCE, { text, level }),
+  question: (data) => api.post(ENDPOINTS.AI.QUESTION, data),
   quiz: (contentId, competencyId, numQuestions) => 
-    api.post('/api/ai/quiz', { contentId, competencyId, numQuestions })
+    api.post(ENDPOINTS.AI.QUIZ, { contentId, competencyId, numQuestions })
 }
 
 export const progressAPI = {
   save: (userId, competencyId, interactions) => 
-    api.post('/api/progress/save', { userId, competencyId, interactions }),
-  get: (userId) => api.get(`/api/progress/${userId}`)
+    api.post(ENDPOINTS.PROGRESS.SAVE, { userId, competencyId, interactions }),
+  get: (userId) => api.get(ENDPOINTS.PROGRESS.GET(userId))
 }
 
 export const careerAPI = {
-  recommendations: (userId) => api.get(`/api/career/recommendations?userId=${userId}`)
+  recommendations: (userId) => api.get(`${ENDPOINTS.CAREER.RECOMMENDATIONS}?userId=${userId}`)
 }
 
 export default api

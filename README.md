@@ -1,103 +1,112 @@
-# 🚀 AI Learning Platform - Hackathon Project
+# 🚀 AI Learning Platform
 
 **Cognitively-aware, offline-first AI learning assistant for Computer Science students**
 
-## 🎯 Quick Start
+---
 
-### Dev 1 (Frontend) - Setup
+## 🚨 FIRST TIME SETUP?
+
+⚠️ **SECURITY SETUP REQUIRED**
+
+1. Read [START_HERE.md](START_HERE.md) (5 min)
+2. Run `setup-security.bat` to generate keys
+3. Update `.env.docker` and `backend/.env` with your keys
+4. Run `python verify-security.py` to verify
+
+---
+
+## ⚡ Quick Start (Choose One)
+
+### Option 1: Docker (Recommended - No Setup Required)
 ```bash
+# Windows: Double-click start-docker.bat
+# Or run:
+docker-compose --env-file .env.docker up --build
+```
+**Access:** http://localhost
+
+### Option 2: Manual Setup
+```bash
+# Backend
+cd backend
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+# Frontend (new terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
-### Dev 2 (Backend) - Setup
-```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate  # Windows
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+---
+
+## 📁 Project Structure
+
 ```
+├── backend/          # FastAPI backend
+├── frontend/         # React frontend
+├── deployment/       # Docker & Kubernetes files
+└── docs/            # Documentation
+```
+
+---
+
+## 📚 Documentation
+
+- **[Backend Setup](backend/README.md)** - Backend installation & API docs
+- **[Frontend Setup](frontend/README.md)** - Frontend installation & features
+- **[Docker Setup](deployment/docker/README.md)** - Docker Compose guide
+- **[Kubernetes Setup](deployment/kubernetes/README.md)** - K8s deployment guide
+- **[API Documentation](docs/API.md)** - API endpoints reference
+
+---
+
+## 🎯 Features
+
+✅ AI-powered Q&A (Gemini API)  
+✅ Adaptive learning (Bayesian Knowledge Tracing)  
+✅ Multi-format content (PDF, DOC, Images, YouTube)  
+✅ Progress tracking & gamification  
+✅ Career pathway mapping  
+✅ Offline-first architecture  
+✅ Docker & Kubernetes ready  
+
+---
 
 ## 🔑 Environment Setup
 
-### Frontend (.env in frontend/)
-```
-VITE_API_URL=http://localhost:8000
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-```
+⚠️ **SECURITY FIRST**: Read [SECURITY_SETUP.md](SECURITY_SETUP.md) before proceeding!
 
-### Backend (.env in backend/)
-```
-GEMINI_API_KEY=your_gemini_api_key_here
-DATABASE_URL=sqlite:///./app.db
-SECRET_KEY=your-secret-key
+Create `.env.docker` in root:
+```env
+GEMINI_API_KEY=your_actual_gemini_api_key_here
+SECRET_KEY=your-secure-jwt-key-min-32-chars
 ```
 
-## 📂 Project Structure
-
-```
-├── frontend/          # Dev 1 works here
-│   ├── src/
-│   │   ├── components/
-│   │   ├── services/
-│   │   └── stores/
-│   └── package.json
-│
-├── backend/           # Dev 2 works here
-│   ├── app/
-│   │   ├── routers/
-│   │   ├── services/
-│   │   └── utils/
-│   └── requirements.txt
-│
-└── docs/
-```
-
-## 🚫 Merge Conflict Prevention
-
-### Dev 1 (Frontend) - Your Files
-- `frontend/**/*` - All frontend files
-- `docs/FRONTEND_GUIDE.md`
-
-### Dev 2 (Backend) - Your Files
-- `backend/**/*` - All backend files
-- `docs/BACKEND_GUIDE.md`
-
-### Shared Files (Coordinate before editing)
-- `README.md`
-- `COMPLETE_HACKATHON_ROADMAP.md`
-- `docs/API_DOCS.md`
-
-## 🔄 Git Workflow
-
+**Generate secure SECRET_KEY:**
 ```bash
-# Pull latest changes before starting work
-git pull origin main
-
-# Create your feature branch
-git checkout -b dev1-feature-name  # Dev 1
-git checkout -b dev2-feature-name  # Dev 2
-
-# Commit your changes
-git add .
-git commit -m "feat: description"
-
-# Push your branch
-git push origin your-branch-name
-
-# Create Pull Request on GitHub
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-## 📋 Development Checklist
-
-See `COMPLETE_HACKATHON_ROADMAP.md` for detailed tasks.
+---
 
 ## 🆘 Need Help?
 
-- Frontend issues: Ask Dev 1
-- Backend issues: Ask Dev 2
-- Integration: Discuss together
+- Backend issues: See `backend/README.md`
+- Frontend issues: See `frontend/README.md`
+- Docker issues: See `deployment/docker/README.md`
+- Kubernetes issues: See `deployment/kubernetes/README.md`
 
-## 🎉 Let's Build Something Amazing!
+---
+
+## 🎉 Tech Stack
+
+**Backend:** FastAPI, SQLAlchemy, Gemini API  
+**Frontend:** React, Vite, TailwindCSS, Zustand  
+**Deployment:** Docker, Kubernetes, Nginx  
+
+---
+
+**Made with ❤️ for BPUT Hackathon**

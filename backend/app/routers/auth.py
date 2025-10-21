@@ -1,18 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from ..database import get_db
 from ..models import User
-import hashlib
+from ..auth import hash_password, verify_password, create_access_token, verify_token
 import uuid
 
 router = APIRouter()
-
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
-
-def verify_password(password: str, hashed: str) -> bool:
-    return hash_password(password) == hashed
 
 class SignupRequest(BaseModel):
     email: str
@@ -42,9 +36,11 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     db.add(user)
     db.commit()
     
+    token = create_access_token(data={"sub": user_id, "email": request.email, "role": request.role})
+    
     return {
         "userId": user_id,
-        "token": f"jwt_token_{user_id}",
+        "token": token,
         "role": request.role
     }
 
@@ -57,14 +53,23 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     if not verify_password(request.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    token = create_access_token(data={"sub": user.id, "email": user.email, "role": user.role})
+    
     return {
         "userId": user.id,
-        "token": f"jwt_token_{user.id}",
+        "token": token,
         "role": user.role
     }
 
 @router.get("/me")
-def get_current_user(user_id: str, db: Session = Depends(get_db)):
+def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid token")
+    
+    token = authorization.replace("Bearer ", "")
+    payload = verify_token(token)
+    user_id = payload.get("sub")
+    
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

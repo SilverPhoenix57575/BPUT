@@ -135,9 +135,9 @@ Make questions clear and educational.`
     }
   }
 
-  const question = quiz.questions[currentQ]
-
   const handleAnswer = () => {
+    if (!quiz) return
+    const question = quiz.questions[currentQ]
     const correct = selected === question.correctAnswer
     if (correct) setScore(prev => prev + 1)
     setShowResult(true)
@@ -334,6 +334,12 @@ Make questions clear and educational.`
       </div>
     )
   }
+
+  if (!quiz || !quiz.questions || quiz.questions.length === 0) {
+    return null
+  }
+
+  const question = quiz.questions[currentQ]
 
   return (
     <div className="max-w-3xl mx-auto p-6">

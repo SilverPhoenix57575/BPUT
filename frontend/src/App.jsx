@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Sparkles, Brain, Target, Zap, LogOut, ClipboardCheck, User, BarChart, Library, MessageSquare, Briefcase } from 'lucide-react'
+import { Sparkles, Brain, Target, Zap, LogOut, ClipboardCheck, User, BarChart, Library, MessageSquare, Briefcase, Trophy } from 'lucide-react'
 import SignIn from './components/auth/SignIn'
 import SignUp from './components/auth/SignUp'
 import QuizView from './components/student/QuizView'
@@ -8,6 +8,7 @@ import CareerMapping from './components/student/CareerMapping'
 import KnowledgeHub from './components/hub/KnowledgeHub'
 import AIChat from './components/shared/AIChat'
 import ThemeToggle from './components/shared/ThemeToggle'
+import GamificationDashboard from './components/gamification/GamificationDashboard'
 import useUserStore from './stores/userStore'
 import useContentStore from './stores/contentStore'
 import axios from 'axios'
@@ -72,6 +73,7 @@ function App() {
         return <Profile />
       case 'career':
         return <CareerMapping />
+
       default:
         return <HomePage onNavigate={setActiveView} />
     }
@@ -102,6 +104,7 @@ function App() {
               <NavButton icon={Library} label="Knowledge Hub" active={activeView === 'hub'} onClick={() => setActiveView('hub')} />
               <NavButton icon={Briefcase} label="Career" active={activeView === 'career'} onClick={() => setActiveView('career')} />
               <NavButton icon={ClipboardCheck} label="Quiz" active={activeView === 'quiz'} onClick={() => setActiveView('quiz')} />
+
               <NavButton icon={User} label="Profile" active={activeView === 'profile'} onClick={() => setActiveView('profile')} />
               <ThemeToggle />
               <button

@@ -6,21 +6,13 @@
 
 ## 🚨 FIRST TIME SETUP?
 
-✅ **SECURITY FIXES APPLIED!** (v1.0.0)
+⚠️ **CRITICAL SECURITY FIXES REQUIRED**
 
-**Quick Setup (3 steps):**
-1. Run `apply-security-fixes.bat` to install dependencies
-2. Run `remove-sensitive-files.bat` to clean git history
+1. **IMMEDIATE**: Run `fix-security.bat` to remove sensitive files from Git
+2. Run `setup-security.bat` to generate secure keys
 3. Update `.env.docker` and `backend/.env` with your Gemini API key
-
-**📖 Read:** [START_HERE_SECURITY.md](START_HERE_SECURITY.md) for complete guide
-
-**🔒 Security Features:**
-- ✅ Bcrypt password hashing
-- ✅ JWT authentication on all AI endpoints
-- ✅ Rate limiting (20 req/min on AI endpoints)
-- ✅ Comprehensive error handling
-- ✅ No sensitive files in git
+4. Read [SECURITY_CHECKLIST.md](docs/setup/SECURITY_CHECKLIST.md) for details
+5. Run `python verify-security.py` to verify
 
 ---
 
@@ -73,13 +65,6 @@ npm run dev
 
 ## 📚 Documentation
 
-### Security Documentation (NEW!)
-- **[🔒 Security Quick Start](START_HERE_SECURITY.md)** - Start here for security setup
-- **[🔒 Security README](SECURITY_README.md)** - Complete security documentation
-- **[🔒 Security Fixes Applied](SECURITY_FIXES_APPLIED.md)** - What was fixed
-- **[🔒 Migration Guide](MIGRATION_GUIDE.md)** - For existing users
-
-### General Documentation
 - **[📖 Documentation Index](docs/README.md)** - Complete documentation guide
 - **[Backend Setup](backend/README.md)** - Backend installation & API docs
 - **[Frontend Setup](frontend/README.md)** - Frontend installation & features
@@ -90,7 +75,6 @@ npm run dev
 
 ## 🎯 Features
 
-### Core Features
 ✅ AI-powered Q&A (Gemini API)  
 ✅ Adaptive learning (Bayesian Knowledge Tracing)  
 ✅ Multi-format content (PDF, DOC, Images, YouTube)  
@@ -98,15 +82,6 @@ npm run dev
 ✅ Career pathway mapping  
 ✅ Offline-first architecture  
 ✅ Docker & Kubernetes ready  
-
-### Security Features (NEW!)
-✅ Bcrypt password hashing  
-✅ JWT authentication  
-✅ Role-based access control  
-✅ Rate limiting (20 req/min on AI)  
-✅ Input validation & sanitization  
-✅ Comprehensive error handling  
-✅ No secrets in git  
 
 ---
 

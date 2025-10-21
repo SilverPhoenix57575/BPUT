@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 from typing import Optional
 from ..services.ai_service import AIService
@@ -8,8 +8,6 @@ from ..constants import (
     MAX_ENHANCE_TEXT_LENGTH, MAX_QUIZ_QUESTIONS, DEFAULT_QUIZ_QUESTIONS
 )
 from ..logger import setup_logger
-from ..dependencies import get_current_user
-from ..models import User
 
 logger = setup_logger(__name__)
 
@@ -33,7 +31,7 @@ class QuizRequest(BaseModel):
     numQuestions: int = Field(default=DEFAULT_QUIZ_QUESTIONS, ge=1, le=MAX_QUIZ_QUESTIONS)
 
 @router.post("/enhance")
-async def enhance_content(request: EnhanceRequest, current_user: User = Depends(get_current_user)):
+async def enhance_content(request: EnhanceRequest):
     try:
         text = validate_text_length(
             sanitize_input(request.text),
@@ -58,7 +56,7 @@ async def enhance_content(request: EnhanceRequest, current_user: User = Depends(
         raise HTTPException(status_code=500, detail="Failed to enhance content. Please try again.")
 
 @router.post("/question")
-async def ask_question(request: QuestionRequest, current_user: User = Depends(get_current_user)):
+async def ask_question(request: QuestionRequest):
     try:
         question = validate_text_length(
             sanitize_input(request.question),
@@ -96,7 +94,7 @@ async def ask_question(request: QuestionRequest, current_user: User = Depends(ge
         raise HTTPException(status_code=500, detail=f"Failed to answer question: {str(e)}")
 
 @router.post("/quiz")
-async def generate_quiz(request: QuizRequest, current_user: User = Depends(get_current_user)):
+async def generate_quiz(request: QuizRequest):
     try:
         logger.info(f"Generating {request.numQuestions} questions for competency: {request.competencyId}")
         questions = await ai_service.generate_quiz(request.contentId, request.numQuestions)
@@ -115,7 +113,7 @@ async def generate_quiz(request: QuizRequest, current_user: User = Depends(get_c
         raise HTTPException(status_code=500, detail="Failed to generate quiz. Please try again.")
 
 @router.post("/feedback")
-async def generate_feedback(answer: str, question: str, current_user: User = Depends(get_current_user)):
+async def generate_feedback(answer: str, question: str):
     try:
         feedback = await ai_service.generate_feedback(answer, question)
         return {
@@ -126,7 +124,7 @@ async def generate_feedback(answer: str, question: str, current_user: User = Dep
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/simplify")
-async def simplify_content(text: str, current_user: User = Depends(get_current_user)):
+async def simplify_content(text: str):
     try:
         simplified = await ai_service.simplify_content(text)
         return {

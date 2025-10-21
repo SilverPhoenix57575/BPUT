@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { Save, Search, Tag, Trash2, Code, FileText, Eye } from 'lucide-react'
+import { Save, Search, Tag, Trash2, Code, FileText, Eye, Sparkles } from 'lucide-react'
 import useNotebookStore from '../../stores/notebookStore'
 import SmartNoteViewer from './SmartNoteViewer'
+import AINotesGenerator from './AINotesGenerator'
 
 export default function MyNotebook() {
-  const { notebookItems, removeFromNotebook } = useNotebookStore()
+  const { notebookItems, removeFromNotebook, addToNotebook } = useNotebookStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedNote, setSelectedNote] = useState(null)
+  const [showAIGenerator, setShowAIGenerator] = useState(false)
 
   const filteredItems = notebookItems.filter(item =>
     item.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -17,6 +19,13 @@ export default function MyNotebook() {
   return (
     <div>
       <div className="mb-6 flex gap-4">
+        <button
+          onClick={() => setShowAIGenerator(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all text-sm font-semibold"
+        >
+          <Sparkles size={18} />
+          Generate AI Notes
+        </button>
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input
@@ -88,6 +97,16 @@ export default function MyNotebook() {
         <SmartNoteViewer
           note={selectedNote}
           onClose={() => setSelectedNote(null)}
+        />
+      )}
+
+      {showAIGenerator && (
+        <AINotesGenerator
+          onClose={() => setShowAIGenerator(false)}
+          onSave={(note) => {
+            addToNotebook(note)
+            setShowAIGenerator(false)
+          }}
         />
       )}
     </div>

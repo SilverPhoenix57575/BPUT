@@ -5,6 +5,26 @@ import useUserStore from '../../stores/userStore'
 import MessageRenderer from '../student/MessageRenderer'
 
 export default function SmartNoteViewer({ note, onClose }) {
+  const decodeHtmlEntities = (text) => {
+    const entities = {
+      '&quot;': '"',
+      '&#34;': '"',
+      '&apos;': "'",
+      '&#39;': "'",
+      '&lt;': '<',
+      '&#60;': '<',
+      '&gt;': '>',
+      '&#62;': '>',
+      '&amp;': '&',
+      '&#38;': '&'
+    }
+    let decoded = text
+    for (const [entity, char] of Object.entries(entities)) {
+      decoded = decoded.split(entity).join(char)
+    }
+    return decoded
+  }
+
   const [messages, setMessages] = useState([
     { role: 'assistant', content: `Hi! I'm ready to answer questions about "${note.title}". What would you like to know?` }
   ])
@@ -26,22 +46,29 @@ export default function SmartNoteViewer({ note, onClose }) {
       // Build context from note content
       const contextText = note.fullText || note.extractedText || note.summary || ''
       const contextualQuestion = contextText 
-        ? `${currentQuestion}\n\nContext from document "${note.title}":\n${contextText.substring(0, 3000)}`
+        ? `Based on this content: ${contextText.substring(0, 2000)}\n\nQuestion: ${currentQuestion}`
         : currentQuestion
+
+      console.log('Sending to AI:', { question: contextualQuestion.substring(0, 200) })
 
       const response = await aiAPI.question({
         question: contextualQuestion,
-        contentId: note.content?.id || note.id || 'demo',
-        userId: user?.id || 'user_123',
-        chatHistory: messages.slice(-10)
+        contentId: String(note.content?.id || note.id || 'note-' + Date.now()),
+        userId: String(user?.id || 'user_123'),
+        chatHistory: []
       })
       
+      console.log('AI Response:', response.data)
+      
+      const decodedAnswer = decodeHtmlEntities(response.data.answer || response.data)
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: response.data.answer,
+        content: decodedAnswer,
         citations: response.data.citations
       }])
     } catch (err) {
+      console.error('Full error:', err)
+      console.error('Error response:', err.response)
       console.error('AI error:', err)
       
       // Extract error message properly
@@ -65,21 +92,38 @@ export default function SmartNoteViewer({ note, onClose }) {
       
       console.log('Parsed error:', errorMsg)
       
-      // Provide helpful response based on error type
-      if (err.code === 'ERR_NETWORK' || !err.response) {
+      // For AI-generated notes, provide direct answers from the content
+      if (note.fullText) {
+        const searchTerm = currentQuestion.toLowerCase()
+        const content = note.fullText.toLowerCase()
+        
+        // Try to find relevant section
+        const lines = note.fullText.split('\n')
+        const relevantLines = lines.filter(line => 
+          line.toLowerCase().includes(searchTerm) ||
+          searchTerm.split(' ').some(word => word.length > 3 && line.toLowerCase().includes(word))
+        )
+        
+        if (relevantLines.length > 0) {
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `Based on the notes:\n\n${relevantLines.slice(0, 5).join('\n\n')}\n\nWould you like me to explain any specific part in more detail?`
+          }])
+        } else {
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `I couldn't find that specific information in the notes. Here's the full content for reference:\n\n${note.fullText.substring(0, 1000)}...\n\nTry asking about the main topics covered.`
+          }])
+        }
+      } else if (err.code === 'ERR_NETWORK' || !err.response) {
         setMessages(prev => [...prev, {
           role: 'assistant',
           content: `The AI service is currently unavailable. However, I can see your document "${note.title}".\n\nHere's what I know:\n${note.summary}\n\nPlease try again later when the service is back online.`
         }])
-      } else if (err.response?.status === 422) {
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: `I'm having trouble processing your request. Let me help you with what I know about "${note.title}":\n\n${note.summary}\n\nTry asking a more specific question about the content.`
-        }])
       } else {
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: `I encountered an error (${errorMsg}). Let me share what I know about "${note.title}":\n\n${note.summary}\n\nPlease try rephrasing your question.`
+          content: `I'm having trouble connecting to the AI service. Let me help you with what I know about "${note.title}":\n\n${note.summary}\n\nTry asking a more specific question about the content.`
         }])
       }
     } finally {
@@ -123,30 +167,38 @@ export default function SmartNoteViewer({ note, onClose }) {
         <div className="flex-1 overflow-hidden flex">
           {/* Left: Note Content */}
           <div className="w-1/2 p-6 overflow-y-auto border-r" style={{ borderColor: 'var(--color-border-primary)' }}>
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="text-blue-600" size={20} />
-                <h3 className="font-bold" style={{ color: 'var(--color-text-primary)' }}>AI Summary</h3>
+            {note.fullText ? (
+              <div className="prose max-w-none" style={{ color: 'var(--color-text-primary)' }}>
+                <MessageRenderer content={note.fullText} />
               </div>
-              <p className="leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
-                {note.summary}
-              </p>
-            </div>
+            ) : (
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="text-blue-600" size={20} />
+                    <h3 className="font-bold" style={{ color: 'var(--color-text-primary)' }}>AI Summary</h3>
+                  </div>
+                  <p className="leading-relaxed" style={{ color: 'var(--color-text-secondary)' }}>
+                    {note.summary}
+                  </p>
+                </div>
 
-            <div>
-              <h3 className="font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-                <Tag size={20} />
-                Key Takeaways
-              </h3>
-              <ul className="space-y-2">
-                {note.keyTakeaways?.map((point, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <span className="text-blue-600 font-bold">•</span>
-                    <span style={{ color: 'var(--color-text-secondary)' }}>{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                <div>
+                  <h3 className="font-bold mb-3 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                    <Tag size={20} />
+                    Key Takeaways
+                  </h3>
+                  <ul className="space-y-2">
+                    {note.keyTakeaways?.map((point, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-blue-600 font-bold">•</span>
+                        <span style={{ color: 'var(--color-text-secondary)' }}>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Right: Chat Interface */}

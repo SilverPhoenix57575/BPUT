@@ -1,7 +1,7 @@
 **To Run Application:**
 
 cd "D:\\BPUT Hackathon\\By-Me-and-Pratik"
-
+cd "A:\\OneDrive\\Desktop\\Folders\\Hackathon\\BPUT\\By Me and Pratik"
 start-docker.bat
 
 **To Stop:**

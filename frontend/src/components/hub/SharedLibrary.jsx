@@ -1,10 +1,12 @@
 import { useState } from 'react'
-import { Folder, FileText, Code, Link as LinkIcon, Plus, Search, MessageSquare, Eye } from 'lucide-react'
+import { Folder, FileText, Code, Link as LinkIcon, Plus, Search, MessageSquare, Eye, Sparkles } from 'lucide-react'
 import useNotebookStore from '../../stores/notebookStore'
 import SmartNoteViewer from './SmartNoteViewer'
+import AINotesGenerator from './AINotesGenerator'
 
 export default function SharedLibrary({ onAddNew }) {
-  const { libraryItems } = useNotebookStore()
+  const { libraryItems, addToLibrary } = useNotebookStore()
+  const [showAIGenerator, setShowAIGenerator] = useState(false)
   const [folders] = useState([
     { id: 1, name: 'Week 1: JavaScript Basics', items: 3 },
     { id: 2, name: 'Week 2: React Fundamentals', items: 5 },
@@ -65,8 +67,18 @@ export default function SharedLibrary({ onAddNew }) {
           </div>
         </div>
 
+        {/* AI Notes Generator */}
+        <button
+          onClick={() => setShowAIGenerator(true)}
+          className="w-full rounded-lg p-4 shadow bg-gradient-to-br from-purple-600 to-blue-600 text-white hover:shadow-lg transition-all mb-4"
+        >
+          <Sparkles className="mb-2" size={24} />
+          <h4 className="font-bold mb-2">Generate AI Notes</h4>
+          <p className="text-sm text-white/90">Create study notes with AI</p>
+        </button>
+
         {/* AI Search */}
-        <div className="rounded-lg p-4 shadow bg-gradient-to-br from-purple-600 to-blue-600 text-white">
+        <div className="rounded-lg p-4 shadow bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
           <MessageSquare className="mb-2" size={24} />
           <h4 className="font-bold mb-2">Ask the Library</h4>
           <p className="text-sm text-white/90 mb-3">AI-powered search across all content</p>
@@ -134,6 +146,16 @@ export default function SharedLibrary({ onAddNew }) {
         <SmartNoteViewer
           note={selectedNote}
           onClose={() => setSelectedNote(null)}
+        />
+      )}
+
+      {showAIGenerator && (
+        <AINotesGenerator
+          onClose={() => setShowAIGenerator(false)}
+          onSave={(note) => {
+            addToLibrary(note)
+            setShowAIGenerator(false)
+          }}
         />
       )}
     </div>

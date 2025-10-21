@@ -15,20 +15,35 @@ export default function EnhancedDashboard() {
   const [analytics, setAnalytics] = useState(null)
 
   useEffect(() => {
-    if (user?.id) {
-      loadProgress(user.id)
+    const initDashboard = async () => {
+      if (user?.id) {
+        loadProgress(user.id)
+      }
+      await fetchData()
     }
-    fetchData()
-  }, [user?.id])
+    initDashboard()
+  }, [])
 
   const fetchData = async () => {
+    if (!user?.id) {
+      setStats({ timeToday: 0, timeWeek: 0, notesCount: 0, flashcardsCount: 0, quizzesCount: 0 })
+      setAnalytics({ activitySummary: { notes: 0, flashcards: 0, quizzes: 0 }, weeklyStudyTime: [], streak: 0, topicAccuracy: [], achievements: [] })
+      return
+    }
+    
     try {
-      const [dashRes, analyticsRes] = await Promise.all([
-        axios.get(`${API_URL}/api/analytics/dashboard/${user.id}`),
-        axios.get(`${API_URL}/api/analytics/parental/${user.id}`)
-      ])
-      setStats(dashRes.data)
-      setAnalytics(analyticsRes.data)
+      const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms))
+      
+      const [dashRes, analyticsRes] = await Promise.race([
+        Promise.all([
+          axios.get(`${API_URL}/api/analytics/dashboard/${user.id}`).catch(() => ({ data: null })),
+          axios.get(`${API_URL}/api/analytics/parental/${user.id}`).catch(() => ({ data: null }))
+        ]),
+        timeout(3000)
+      ]).catch(() => [{ data: null }, { data: null }])
+      
+      setStats(dashRes.data || { timeToday: 0, timeWeek: 0, notesCount: 0, flashcardsCount: 0, quizzesCount: 0 })
+      setAnalytics(analyticsRes.data || { activitySummary: { notes: 0, flashcards: 0, quizzes: 0 }, weeklyStudyTime: [], streak: 0, topicAccuracy: [], achievements: [] })
     } catch (error) {
       console.error('Failed to fetch data:', error)
       setStats({ timeToday: 0, timeWeek: 0, notesCount: 0, flashcardsCount: 0, quizzesCount: 0 })
@@ -47,7 +62,16 @@ export default function EnhancedDashboard() {
     return Math.round(analytics.topicAccuracy.reduce((sum, t) => sum + t.accuracy, 0) / analytics.topicAccuracy.length)
   }
 
-  if (!stats || !analytics) return <div className="text-center py-8">Loading...</div>
+  if (!stats || !analytics) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-lg" style={{ color: 'var(--color-text-secondary)' }}>Loading your dashboard...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">

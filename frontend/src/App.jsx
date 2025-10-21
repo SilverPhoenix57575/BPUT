@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Brain, LogOut, ClipboardCheck, User, Library, MessageSquare, Briefcase } from 'lucide-react'
+import { Brain, LogOut, ClipboardCheck, User, Library, MessageSquare, Briefcase, Network } from 'lucide-react'
 import SignIn from './components/auth/SignIn'
 import SignUp from './components/auth/SignUp'
 import QuizView from './components/student/QuizView'
@@ -7,7 +7,9 @@ import Profile from './components/student/Profile'
 import CareerMapping from './components/student/CareerMapping'
 import EnhancedDashboard from './components/student/EnhancedDashboard'
 import KnowledgeHub from './components/hub/KnowledgeHub'
+import MindMapCreator from './components/hub/MindMapCreator'
 import AIChat from './components/shared/AIChat'
+import PomodoroTimer from './components/shared/PomodoroTimer'
 import ThemeToggle from './components/shared/ThemeToggle'
 import OfflineIndicator from './components/shared/OfflineIndicator'
 import EducatorApp from './EducatorApp'
@@ -79,6 +81,8 @@ function App() {
         return <AIChat />
       case 'hub':
         return <KnowledgeHub />
+      case 'mindmap':
+        return <MindMapCreator />
       case 'quiz':
         return <QuizView contentId={currentContent?.id || 'demo'} competencyId="cs_001" />
       case 'profile':
@@ -113,6 +117,7 @@ function App() {
             <div className="flex items-center gap-2">
               <NavButton icon={MessageSquare} label="AI Chat" active={activeView === 'chat'} onClick={() => setActiveView('chat')} />
               <NavButton icon={Library} label="Knowledge Hub" active={activeView === 'hub'} onClick={() => setActiveView('hub')} />
+              <NavButton icon={Network} label="Mind Map" active={activeView === 'mindmap'} onClick={() => setActiveView('mindmap')} />
               <NavButton icon={Briefcase} label="Career" active={activeView === 'career'} onClick={() => setActiveView('career')} />
               <NavButton icon={ClipboardCheck} label="Quiz" active={activeView === 'quiz'} onClick={() => setActiveView('quiz')} />
               <NavButton icon={User} label="Profile" active={activeView === 'profile'} onClick={() => setActiveView('profile')} />
@@ -135,6 +140,7 @@ function App() {
       <main className="py-8">
         {renderContent()}
       </main>
+      <PomodoroTimer />
       <OfflineIndicator />
     </div>
   )

@@ -12,7 +12,10 @@ export const logStudySession = async (userId, activityType, topic, duration, sco
       score
     })
   } catch (error) {
-    console.error('Failed to log session:', error)
+    // Silently fail - analytics endpoint not critical
+    if (error.response?.status !== 404) {
+      console.warn('Analytics logging failed (non-critical):', error.message)
+    }
   }
 }
 
@@ -22,6 +25,9 @@ export const awardAchievement = async (userId, badgeId, badgeName) => {
       params: { user_id: userId, badge_id: badgeId, badge_name: badgeName }
     })
   } catch (error) {
-    console.error('Failed to award achievement:', error)
+    // Silently fail - analytics endpoint not critical
+    if (error.response?.status !== 404) {
+      console.warn('Achievement logging failed (non-critical):', error.message)
+    }
   }
 }

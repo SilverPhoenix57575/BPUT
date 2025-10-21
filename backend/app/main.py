@@ -3,14 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from .database import engine, Base
-<<<<<<< HEAD
-from .routers import content, ai, auth, educator, career, progress, analytics, projects
-=======
 from .routers import content, ai, auth, educator, career, progress, analytics
 from .constants import UPLOAD_DIR
 from .logger import setup_logger
 from .config import settings
->>>>>>> 023b0b074d404c60f4636151687192365b04a3a0
 import os
 
 logger = setup_logger(__name__)
@@ -49,19 +45,8 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
-<<<<<<< HEAD
-app.include_router(content.router, prefix="/api/content", tags=["content"])
-app.include_router(ai.router, prefix="/api/ai", tags=["ai"])
-app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
-app.include_router(educator.router, prefix="/api/educator", tags=["educator"])
-app.include_router(career.router, prefix="/api/career", tags=["career"])
-app.include_router(progress.router, prefix="/api/progress", tags=["progress"])
-app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
-app.include_router(projects.router, prefix="/api/projects", tags=["projects"])
-=======
 # Add compression middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
->>>>>>> 023b0b074d404c60f4636151687192365b04a3a0
 
 # API v1 routes
 app.include_router(content.router, prefix="/api/v1/content", tags=["content"])

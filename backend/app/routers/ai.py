@@ -64,10 +64,22 @@ async def ask_question(request: QuestionRequest):
             MAX_TEXT_LENGTH,
             "Question"
         )
-        logger.info(f"Received question: {question[:50]}... for user: {request.userId}")
-        logger.info(f"ContentId: {request.contentId}, ResponseType: {request.responseType}")
+        logger.info("="*60)
+        logger.info("🎯 QUIZ GENERATION REQUEST RECEIVED")
+        logger.info(f"User: {request.userId}")
+        logger.info(f"ContentId: {request.contentId}")
+        logger.info(f"Question length: {len(question)} chars")
+        logger.info(f"Question preview: {question[:100]}...")
+        logger.info(f"ResponseType: {request.responseType}")
+        logger.info("="*60)
+        
         answer = await ai_service.answer_question(question, request.contentId, request.chatHistory, request.responseType)
-        logger.info("Question answered successfully")
+        
+        logger.info("✅ Gemini API call successful")
+        logger.info(f"Response length: {len(answer)} chars")
+        logger.info(f"Response preview: {answer[:200]}...")
+        logger.info("="*60)
+        
         return {
             "success": True,
             "data": {

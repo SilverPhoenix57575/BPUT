@@ -51,7 +51,11 @@ Instructions: {instruction}
 
 Provide your answer:"""
             
-            logger.info(f"Calling Gemini API with {response_type} response type...")
+            logger.info("="*60)
+            logger.info(f"🤖 CALLING GEMINI API ({response_type} response)")
+            logger.info(f"Prompt length: {len(prompt)} chars")
+            logger.info("="*60)
+            
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(None, partial(self.model.generate_content, prompt))
             
@@ -59,7 +63,10 @@ Provide your answer:"""
                 raise ValueError("Empty response from Gemini API")
             
             answer = response.text
-            logger.info(f"Got answer: {answer[:100]}...")
+            logger.info("✅ GEMINI RESPONSE RECEIVED")
+            logger.info(f"Response length: {len(answer)} chars")
+            logger.info(f"Response preview: {answer[:300]}...")
+            logger.info("="*60)
             return answer
         except Exception as e:
             logger.error(f"Gemini API error: {str(e)}", exc_info=True)

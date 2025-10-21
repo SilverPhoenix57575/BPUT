@@ -9,30 +9,30 @@ export const API_CONFIG = {
 
 export const ENDPOINTS = {
   AUTH: {
-    SIGNUP: '/api/v1/auth/signup',
-    LOGIN: '/api/v1/auth/login',
-    ME: '/api/v1/auth/me',
+    SIGNUP: '/api/auth/signup',
+    LOGIN: '/api/auth/login',
+    ME: '/api/auth/me',
   },
   CONTENT: {
-    UPLOAD: '/api/v1/content/upload',
-    LIST: '/api/v1/content/list',
-    GET: (id) => `/api/v1/content/${id}`,
+    UPLOAD: '/api/content/upload',
+    LIST: '/api/content/list',
+    GET: (id) => `/api/content/${id}`,
   },
   AI: {
-    ENHANCE: '/api/v1/ai/enhance',
-    QUESTION: '/api/v1/ai/question',
-    QUIZ: '/api/v1/ai/quiz',
-    FEEDBACK: '/api/v1/ai/feedback',
-    SIMPLIFY: '/api/v1/ai/simplify',
+    ENHANCE: '/api/ai/enhance',
+    QUESTION: '/api/ai/question',
+    QUIZ: '/api/ai/quiz',
+    FEEDBACK: '/api/ai/feedback',
+    SIMPLIFY: '/api/ai/simplify',
   },
   PROGRESS: {
-    SAVE: '/api/v1/progress/save',
-    GET: (userId) => `/api/v1/progress/${userId}`,
+    SAVE: '/api/progress/save',
+    GET: (userId) => `/api/progress/${userId}`,
   },
   CAREER: {
-    RECOMMENDATIONS: '/api/v1/career/recommendations',
+    RECOMMENDATIONS: '/api/career/recommendations',
   },
   ANALYTICS: {
-    GET: (userId) => `/api/v1/analytics/${userId}`,
+    GET: (userId) => `/api/analytics/${userId}`,
   },
 }

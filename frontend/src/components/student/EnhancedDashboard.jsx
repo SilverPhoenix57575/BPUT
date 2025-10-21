@@ -10,13 +10,16 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 export default function EnhancedDashboard() {
   const { user } = useUserStore()
   const { xp, level, streak } = useGamificationStore()
-  const { masteryLevels, quizzesTaken, totalTimeSpent } = useProgressStore()
+  const { masteryLevels, quizzesTaken, totalTimeSpent, loadProgress } = useProgressStore()
   const [stats, setStats] = useState(null)
   const [analytics, setAnalytics] = useState(null)
 
   useEffect(() => {
+    if (user?.id) {
+      loadProgress(user.id)
+    }
     fetchData()
-  }, [])
+  }, [user?.id])
 
   const fetchData = async () => {
     try {

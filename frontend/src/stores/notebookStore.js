@@ -1,23 +1,56 @@
 import { create } from 'zustand'
+import offlineStorage from '../services/pouchdb'
 
-const useNotebookStore = create((set) => ({
+const useNotebookStore = create((set, get) => ({
   notebookItems: [],
   libraryItems: [],
   
-  addToNotebook: (item) => set((state) => ({
-    notebookItems: [...state.notebookItems, { ...item, id: Date.now(), createdAt: new Date().toISOString() }]
-  })),
+  loadNotebook: async (userId) => {
+    try {
+      const notes = await offlineStorage.getNotes(userId)
+      set({ notebookItems: notes.filter(n => n.destination === 'notebook') })
+    } catch (err) {
+      console.error('Failed to load notebook:', err)
+    }
+  },
   
-  addToLibrary: (item) => set((state) => ({
-    libraryItems: [...state.libraryItems, { ...item, id: Date.now(), createdAt: new Date().toISOString() }]
-  })),
+  loadLibrary: async (userId) => {
+    try {
+      const notes = await offlineStorage.getNotes(userId)
+      set({ libraryItems: notes.filter(n => n.destination === 'library') })
+    } catch (err) {
+      console.error('Failed to load library:', err)
+    }
+  },
+  
+  addToNotebook: async (item, userId) => {
+    try {
+      const saved = await offlineStorage.saveNote(userId, { ...item, destination: 'notebook' })
+      set((state) => ({ notebookItems: [...state.notebookItems, saved] }))
+      return saved
+    } catch (err) {
+      console.error('Failed to save to notebook:', err)
+      throw err
+    }
+  },
+  
+  addToLibrary: async (item, userId) => {
+    try {
+      const saved = await offlineStorage.saveNote(userId, { ...item, destination: 'library' })
+      set((state) => ({ libraryItems: [...state.libraryItems, saved] }))
+      return saved
+    } catch (err) {
+      console.error('Failed to save to library:', err)
+      throw err
+    }
+  },
   
   removeFromNotebook: (id) => set((state) => ({
-    notebookItems: state.notebookItems.filter(item => item.id !== id)
+    notebookItems: state.notebookItems.filter(item => item._id !== id)
   })),
   
   removeFromLibrary: (id) => set((state) => ({
-    libraryItems: state.libraryItems.filter(item => item.id !== id)
+    libraryItems: state.libraryItems.filter(item => item._id !== id)
   }))
 }))
 

@@ -6,12 +6,13 @@
 
 ## 🚨 FIRST TIME SETUP?
 
-⚠️ **SECURITY SETUP REQUIRED**
+⚠️ **CRITICAL SECURITY FIXES REQUIRED**
 
-1. Read [START_HERE.md](START_HERE.md) (5 min)
-2. Run `setup-security.bat` to generate keys
-3. Update `.env.docker` and `backend/.env` with your keys
-4. Run `python verify-security.py` to verify
+1. **IMMEDIATE**: Run `fix-security.bat` to remove sensitive files from Git
+2. Run `setup-security.bat` to generate secure keys
+3. Update `.env.docker` and `backend/.env` with your Gemini API key
+4. Read [SECURITY_CHECKLIST.md](SECURITY_CHECKLIST.md) for details
+5. Run `python verify-security.py` to verify
 
 ---
 

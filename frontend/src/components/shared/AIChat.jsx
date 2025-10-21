@@ -1,17 +1,116 @@
-import { useState } from 'react'
-import { Send, Sparkles, Copy, Check } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Send, Sparkles, Copy, Check, Plus, MessageSquare, Trash2 } from 'lucide-react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { aiAPI } from '../../services/api'
 import useUserStore from '../../stores/userStore'
 
 export default function AIChat() {
+  const [chatSessions, setChatSessions] = useState([])
+  const [currentSessionId, setCurrentSessionId] = useState(null)
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Hi! I\'m your AI learning assistant. Ask me anything!' }
   ])
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
   const user = useUserStore(state => state.user)
+
+  useEffect(() => {
+    loadChatSessions()
+  }, [])
+
+  useEffect(() => {
+    if (messages.length > 1 && currentSessionId) {
+      saveChatSession()
+    }
+  }, [messages])
+
+  const loadChatSessions = () => {
+    const saved = localStorage.getItem('chatSessions')
+    if (saved) {
+      const sessions = JSON.parse(saved)
+      setChatSessions(sessions)
+      if (sessions.length > 0) {
+        loadSession(sessions[0].id)
+      }
+    }
+  }
+
+  const generateChatTitle = async () => {
+    if (messages.length < 3) return 'New Chat'
+    
+    try {
+      const conversation = messages.slice(0, 4).map(m => 
+        `${m.role === 'user' ? 'User' : 'AI'}: ${m.content.slice(0, 100)}`
+      ).join('\n')
+      
+      const response = await aiAPI.question({
+        question: `Generate a short 3-5 word title for this conversation:\n${conversation}\n\nTitle:`,
+        contentId: 'title_gen',
+        userId: user?.id || 'user',
+        chatHistory: []
+      })
+      
+      return response.data.answer.replace(/["']/g, '').trim().slice(0, 50)
+    } catch {
+      return messages.find(m => m.role === 'user')?.content.slice(0, 50) || 'New Chat'
+    }
+  }
+
+  const saveChatSession = async () => {
+    const sessions = [...chatSessions]
+    const existingIndex = sessions.findIndex(s => s.id === currentSessionId)
+    
+    let title = sessions[existingIndex]?.title
+    if (!title || title === 'New Chat') {
+      title = await generateChatTitle()
+    }
+    
+    const session = {
+      id: currentSessionId,
+      title,
+      messages,
+      timestamp: new Date().toISOString()
+    }
+
+    if (existingIndex >= 0) {
+      sessions[existingIndex] = session
+    } else {
+      sessions.unshift(session)
+    }
+
+    setChatSessions(sessions)
+    localStorage.setItem('chatSessions', JSON.stringify(sessions))
+  }
+
+  const createNewChat = () => {
+    const newId = `chat_${Date.now()}`
+    setCurrentSessionId(newId)
+    setMessages([{ role: 'assistant', content: 'Hi! I\'m your AI learning assistant. Ask me anything!' }])
+  }
+
+  const loadSession = (sessionId) => {
+    const session = chatSessions.find(s => s.id === sessionId)
+    if (session) {
+      setCurrentSessionId(session.id)
+      setMessages(session.messages)
+    }
+  }
+
+  const deleteSession = (sessionId) => {
+    const filtered = chatSessions.filter(s => s.id !== sessionId)
+    setChatSessions(filtered)
+    localStorage.setItem('chatSessions', JSON.stringify(filtered))
+    if (currentSessionId === sessionId) {
+      createNewChat()
+    }
+  }
+
+  useEffect(() => {
+    if (!currentSessionId) {
+      createNewChat()
+    }
+  }, [])
 
   const handleAsk = async () => {
     if (!question.trim()) return
@@ -46,20 +145,81 @@ export default function AIChat() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-          AI Learning Assistant
-        </h2>
-        <p style={{ color: 'var(--color-text-secondary)' }}>Ask questions and get detailed, formatted answers</p>
-      </div>
-
-      <div className="rounded-2xl shadow-lg p-6 mb-6" style={{
+    <div className="flex h-[calc(100vh-120px)] gap-4 px-6">
+      {/* Sidebar */}
+      <div className="w-64 flex-shrink-0 rounded-2xl shadow-lg p-4" style={{
         backgroundColor: 'var(--color-bg-primary)',
         borderColor: 'var(--color-border-primary)',
         borderWidth: '1px'
       }}>
-        <div className="space-y-6 max-h-[600px] overflow-y-auto mb-6">
+        <button
+          onClick={createNewChat}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 mb-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+        >
+          <Plus size={20} />
+          New Chat
+        </button>
+
+        <div className="space-y-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 250px)' }}>
+          {chatSessions.map((session) => (
+            <div
+              key={session.id}
+              className="group relative"
+            >
+              <button
+                onClick={() => loadSession(session.id)}
+                className="w-full text-left px-3 py-2 rounded-lg transition-all"
+                style={{
+                  backgroundColor: currentSessionId === session.id ? 'var(--color-bg-tertiary)' : 'transparent',
+                  color: 'var(--color-text-primary)'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)'}
+                onMouseLeave={(e) => {
+                  if (currentSessionId !== session.id) {
+                    e.currentTarget.style.backgroundColor = 'transparent'
+                  }
+                }}
+              >
+                <div className="flex items-start gap-2">
+                  <MessageSquare size={16} className="mt-1 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm truncate">{session.title}</p>
+                    <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                      {new Date(session.timestamp).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  deleteSession(session.id)
+                }}
+                className="absolute right-2 top-2 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100"
+                style={{ color: '#ef4444' }}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col">
+        <div className="mb-4">
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+            AI Learning Assistant
+          </h2>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Ask questions and get detailed answers</p>
+        </div>
+
+        <div className="flex-1 rounded-2xl shadow-lg p-6 flex flex-col" style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        borderColor: 'var(--color-border-primary)',
+        borderWidth: '1px'
+      }}>
+          <div className="flex-1 space-y-6 overflow-y-auto mb-6">
           {messages.map((msg, idx) => (
             <div key={idx}>
               {msg.role === 'user' ? (
@@ -94,9 +254,9 @@ export default function AIChat() {
               </div>
             </div>
           )}
-        </div>
+          </div>
 
-        <div className="flex gap-3">
+          <div className="flex gap-3">
           <input
             type="text"
             value={question}
@@ -117,6 +277,7 @@ export default function AIChat() {
           >
             <Send size={24} />
           </button>
+          </div>
         </div>
       </div>
     </div>

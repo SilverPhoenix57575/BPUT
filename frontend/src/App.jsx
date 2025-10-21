@@ -9,6 +9,7 @@ import EnhancedDashboard from './components/student/EnhancedDashboard'
 import KnowledgeHub from './components/hub/KnowledgeHub'
 import AIChat from './components/shared/AIChat'
 import ThemeToggle from './components/shared/ThemeToggle'
+import OfflineIndicator from './components/shared/OfflineIndicator'
 import EducatorApp from './EducatorApp'
 import SchoolApp from './SchoolApp'
 import useUserStore from './stores/userStore'
@@ -134,6 +135,7 @@ function App() {
       <main className="py-8">
         {renderContent()}
       </main>
+      <OfflineIndicator />
     </div>
   )
 }

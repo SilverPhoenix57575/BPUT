@@ -1,21 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BookOpen, Library, Compass, Plus } from 'lucide-react'
 import MyNotebook from './MyNotebook'
 import SharedLibrary from './SharedLibrary'
 import LearningCompass from './LearningCompass'
 import ContentImporter from './ContentImporter'
 import useNotebookStore from '../../stores/notebookStore'
+import useUserStore from '../../stores/userStore'
 
 export default function KnowledgeHub() {
   const [activeTab, setActiveTab] = useState('notebook')
   const [showImporter, setShowImporter] = useState(false)
-  const { addToNotebook, addToLibrary } = useNotebookStore()
+  const { addToNotebook, addToLibrary, loadNotebook, loadLibrary } = useNotebookStore()
+  const user = useUserStore(state => state.user)
 
-  const handleSaveContent = (smartNote) => {
-    if (smartNote.destination === 'notebook') {
-      addToNotebook(smartNote)
-    } else {
-      addToLibrary(smartNote)
+  useEffect(() => {
+    if (user?.id) {
+      loadNotebook(user.id)
+      loadLibrary(user.id)
+    }
+  }, [user?.id])
+
+  const handleSaveContent = async (smartNote) => {
+    if (!user?.id) return
+    try {
+      if (smartNote.destination === 'notebook') {
+        await addToNotebook(smartNote, user.id)
+      } else {
+        await addToLibrary(smartNote, user.id)
+      }
+    } catch (err) {
+      console.error('Failed to save:', err)
     }
   }
 

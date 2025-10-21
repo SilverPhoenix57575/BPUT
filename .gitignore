@@ -11,6 +11,8 @@
 .env.test
 *.env
 **/.env
+backend/.env
+frontend/.env
 **/config/secrets.json
 **/config/credentials.json
 
@@ -102,17 +104,25 @@ backend/wheels/
 backend/pip-wheel-metadata/
 backend/share/python-wheels/
 
-# Database files
+# Database files - CRITICAL SECURITY
 backend/*.db
 backend/*.sqlite
 backend/*.sqlite3
 backend/app.db
 backend/database.db
+*.db
+*.sqlite
+*.sqlite3
+app.db
+database.db
 
-# Uploaded files (temporary)
+# Uploaded files - SECURITY RISK
 backend/uploads/
 backend/temp/
 backend/tmp/
+uploads/
+temp/
+tmp/
 
 # Tesseract temp files
 backend/tesseract_temp/

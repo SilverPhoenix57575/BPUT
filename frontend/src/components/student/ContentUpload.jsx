@@ -84,8 +84,11 @@ export default function ContentUpload() {
         />
         <label
           htmlFor="file-upload"
-          className="inline-block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl cursor-pointer hover:shadow-lg hover:scale-105 transition-all font-semibold"
+          className={`inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-xl cursor-pointer hover:shadow-lg hover:scale-105 transition-all font-semibold ${uploading ? 'opacity-75 cursor-not-allowed' : ''}`}
         >
+          {uploading && (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          )}
           {uploading ? 'Uploading...' : 'Select File'}
         </label>
 

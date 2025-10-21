@@ -3,18 +3,16 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Content
 from ..services.content_processor import ContentProcessor
+from ..validators import validate_file_extension
+from ..constants import ALLOWED_EXTENSIONS, MAX_FILE_SIZE
+from ..logger import setup_logger
 from datetime import datetime
 import uuid
 import os
-import logging
 
-logger = logging.getLogger(__name__)
-
+logger = setup_logger(__name__)
 router = APIRouter()
 processor = ContentProcessor()
-
-ALLOWED_EXTENSIONS = {'.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg', '.txt'}
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
 @router.post("/upload")
 async def upload_content(
@@ -25,16 +23,16 @@ async def upload_content(
     try:
         logger.info(f"Uploading file: {file.filename} for user: {user_id}")
         
-        file_ext = os.path.splitext(file.filename)[1].lower()
-        if file_ext not in ALLOWED_EXTENSIONS:
-            raise HTTPException(status_code=400, detail=f"File type {file_ext} not allowed. Allowed: {', '.join(ALLOWED_EXTENSIONS)}")
+        file_ext = validate_file_extension(file.filename)
         
         file_content = await file.read()
         
         if len(file_content) > MAX_FILE_SIZE:
+            logger.warning(f"File too large: {len(file_content)} bytes")
             raise HTTPException(status_code=400, detail=f"File too large. Max size: {MAX_FILE_SIZE // (1024*1024)}MB")
         
         if len(file_content) == 0:
+            logger.warning("Empty file uploaded")
             raise HTTPException(status_code=400, detail="Empty file uploaded")
         
         content_id = f"content_{uuid.uuid4().hex[:12]}"
@@ -64,33 +62,39 @@ async def upload_content(
         logger.info(f"Content saved to database: {content_id}")
         
         return {
-            "id": content_id,
-            "filename": file.filename,
-            "type": file.content_type,
-            "extractedText": extracted_text[:500] if extracted_text else "No text extracted",
-            "fileUrl": f"/uploads/{saved_filename}",
-            "timestamp": content.created_at.isoformat()
+            "success": True,
+            "data": {
+                "id": content_id,
+                "filename": file.filename,
+                "type": file.content_type,
+                "extractedText": extracted_text[:500] if extracted_text else "No text extracted",
+                "fileUrl": f"/uploads/{saved_filename}",
+                "timestamp": content.created_at.isoformat()
+            }
         }
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Upload error: {str(e)}")
+        logger.error(f"Upload error: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to upload file. Please try again.")
 
 @router.get("/list")
 def list_content(user_id: str = "default_user", db: Session = Depends(get_db)):
     contents = db.query(Content).filter(Content.user_id == user_id).all()
     return {
-        "contents": [
-            {
-                "id": c.id,
-                "filename": c.filename,
-                "type": c.content_type,
-                "fileUrl": c.file_url,
-                "timestamp": c.created_at.isoformat()
-            }
-            for c in contents
-        ]
+        "success": True,
+        "data": {
+            "contents": [
+                {
+                    "id": c.id,
+                    "filename": c.filename,
+                    "type": c.content_type,
+                    "fileUrl": c.file_url,
+                    "timestamp": c.created_at.isoformat()
+                }
+                for c in contents
+            ]
+        }
     }
 
 @router.get("/{content_id}")
@@ -100,10 +104,13 @@ def get_content(content_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Content not found")
     
     return {
-        "id": content.id,
-        "filename": content.filename,
-        "type": content.content_type,
-        "fileUrl": content.file_url,
-        "extractedText": content.extracted_text,
-        "timestamp": content.created_at.isoformat()
+        "success": True,
+        "data": {
+            "id": content.id,
+            "filename": content.filename,
+            "type": content.content_type,
+            "fileUrl": content.file_url,
+            "extractedText": content.extracted_text,
+            "timestamp": content.created_at.isoformat()
+        }
     }

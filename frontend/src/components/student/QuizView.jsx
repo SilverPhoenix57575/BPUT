@@ -528,7 +528,7 @@ Q:`
 
   if (showTopicInput && !loading) {
     return (
-      <div className="max-w-3xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6">
         <div className="mb-6">
           <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             AI Quiz Generator
@@ -847,7 +847,7 @@ Q:`
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6">
         <div className="rounded-2xl shadow-xl p-12 text-center" style={{
           backgroundColor: 'var(--color-bg-primary)',
           borderColor: 'var(--color-border-primary)',
@@ -865,7 +865,7 @@ Q:`
   if (completed) {
     const percentage = Math.round((score / quiz.questions.length) * 100)
     return (
-      <div className="max-w-3xl mx-auto p-6">
+      <div className="max-w-7xl mx-auto p-6">
         <div className="rounded-2xl shadow-xl p-12 text-center" style={{
           backgroundColor: 'var(--color-bg-primary)',
           borderColor: 'var(--color-border-primary)',
@@ -908,7 +908,7 @@ Q:`
   const question = quiz.questions[currentQ]
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto p-6">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>

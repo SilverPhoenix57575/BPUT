@@ -3,11 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from .database import engine, Base
-<<<<<<< HEAD
-from .routers import content, ai, auth, educator, career, progress, analytics
-=======
 from .routers import content, ai, auth, educator, career, progress, analytics, projects, pomodoro, mindmap
->>>>>>> b9d7b41fbc73f3f983bd98e997165544199e3c6b
 from .constants import UPLOAD_DIR
 from .logger import setup_logger
 from .config import settings
@@ -60,6 +56,7 @@ app.include_router(educator.router, prefix="/api/v1/educator", tags=["educator"]
 app.include_router(career.router, prefix="/api/v1/career", tags=["career"])
 app.include_router(progress.router, prefix="/api/v1/progress", tags=["progress"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["analytics"])
+app.include_router(projects.router, prefix="/api/v1/projects", tags=["projects"])
 app.include_router(pomodoro.router, prefix="/api/v1/pomodoro", tags=["pomodoro"])
 app.include_router(mindmap.router, prefix="/api/v1/mindmap", tags=["mindmap"])
 
@@ -71,6 +68,7 @@ app.include_router(educator.router, prefix="/api/educator", tags=["educator-lega
 app.include_router(career.router, prefix="/api/career", tags=["career-legacy"], include_in_schema=False)
 app.include_router(progress.router, prefix="/api/progress", tags=["progress-legacy"], include_in_schema=False)
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics-legacy"], include_in_schema=False)
+app.include_router(projects.router, prefix="/api/projects", tags=["projects-legacy"], include_in_schema=False)
 app.include_router(pomodoro.router, prefix="/api/pomodoro", tags=["pomodoro-legacy"], include_in_schema=False)
 app.include_router(mindmap.router, prefix="/api/mindmap", tags=["mindmap-legacy"], include_in_schema=False)
 

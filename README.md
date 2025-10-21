@@ -25,6 +25,15 @@ docker-compose --env-file .env.docker up --build
 ```
 **Access:** http://localhost
 
+### After Git Pull (Update Changes)
+```bash
+# Windows: Double-click update-docker.bat
+# Or run:
+docker-compose down
+docker-compose build --no-cache
+docker-compose --env-file .env.docker up
+```
+
 ### Option 2: Manual Setup
 ```bash
 # Backend

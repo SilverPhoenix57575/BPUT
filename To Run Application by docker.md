@@ -8,13 +8,27 @@ start-docker.bat
 
 Ctrl + C
 
-docker-compose dow
+docker-compose down
 
-**To Update After Changes:**
+**To Update After Changes (Pull from Git):**
 
 docker-compose down
 
-docker-compose --env-file .env.docker up --build
+docker-compose build --no-cache
+
+docker-compose --env-file .env.docker up
+
+**After pulling changes, run:**
+
+update-docker.bat
+
+**rebuild Or manually**
+
+docker-compose down
+docker-compose build --no-cache
+docker-compose --env-file .env.docker up
+
+Copy
 
 
 ***🎯 What to Do:***

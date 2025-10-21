@@ -1,220 +1,189 @@
-import { useState, useEffect } from 'react'
-import { BarChart3, TrendingUp, Award, Target } from 'lucide-react'
-import axios from 'axios'
-import useUserStore from '../../stores/userStore'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { BarChart3, TrendingUp, Flame, Target, Award } from 'lucide-react'
+import useAnalyticsStore from '../../stores/analyticsStore'
+import useGamificationStore from '../../stores/gamificationStore'
 
 export default function ParentalAnalytics() {
-  const { user } = useUserStore()
-  const [analytics, setAnalytics] = useState(null)
+  const { activityStats, weeklyStudyTime, topicAccuracy } = useAnalyticsStore()
+  const { streak, achievements } = useGamificationStore()
 
-  useEffect(() => {
-    fetchAnalytics()
-  }, [])
-
-  const fetchAnalytics = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/api/analytics/parental/${user.id}`)
-      setAnalytics(response.data)
-    } catch (error) {
-      console.error('Failed to fetch analytics:', error)
-    }
-  }
-
-  if (!analytics) return <div className="text-center py-8">Loading analytics...</div>
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const maxTime = Math.max(...weeklyStudyTime, 1)
 
   return (
-    <div className="max-w-7xl mx-auto px-6">
+    <div className="max-w-6xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+        <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
           Learning Analytics 📊
-        </h1>
-        <p style={{ color: 'var(--color-text-secondary)' }}>
-          Comprehensive overview of learning progress and achievements
-        </p>
+        </h2>
+        <p style={{ color: 'var(--color-text-secondary)' }}>Monitor progress and study habits</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <ActivityCard
-          title="Study Activity Summary"
-          data={analytics.activitySummary}
-          icon={BarChart3}
-        />
-        <StreakCard streak={analytics.streak} />
-        <AchievementsCard achievements={analytics.achievements} />
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <WeeklyChart data={analytics.weeklyStudyTime} />
-        <TopicAccuracy data={analytics.topicAccuracy} />
-      </div>
-    </div>
-  )
-}
-
-function ActivityCard({ title, data, icon: Icon }) {
-  return (
-    <div className="rounded-2xl p-6 shadow-lg" style={{
-      backgroundColor: 'var(--color-bg-primary)',
-      borderColor: 'var(--color-border-primary)',
-      borderWidth: '1px'
-    }}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="bg-gradient-to-br from-blue-500 to-cyan-500 w-10 h-10 rounded-lg flex items-center justify-center">
-          <Icon className="text-white" size={20} />
+      {/* Study Activity Summary */}
+      <div className="rounded-xl p-6 shadow-md mb-6" style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        borderColor: 'var(--color-border-primary)',
+        borderWidth: '1px'
+      }}>
+        <div className="flex items-center gap-2 mb-6">
+          <BarChart3 className="text-blue-600" size={24} />
+          <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Study Activity Summary</h3>
         </div>
-        <h3 className="font-bold" style={{ color: 'var(--color-text-primary)' }}>{title}</h3>
-      </div>
-      <div className="space-y-3">
-        <StatRow label="Notes Generated" value={data.notes} color="blue" />
-        <StatRow label="Flashcards Created" value={data.flashcards} color="purple" />
-        <StatRow label="Quizzes Taken" value={data.quizzes} color="green" />
-      </div>
-    </div>
-  )
-}
-
-function StreakCard({ streak }) {
-  return (
-    <div className="rounded-2xl p-6 shadow-lg" style={{
-      backgroundColor: 'var(--color-bg-primary)',
-      borderColor: 'var(--color-border-primary)',
-      borderWidth: '1px'
-    }}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="bg-gradient-to-br from-orange-500 to-red-500 w-10 h-10 rounded-lg flex items-center justify-center">
-          <TrendingUp className="text-white" size={20} />
+        <div className="grid md:grid-cols-3 gap-6">
+          <ActivityBar label="Notes Generated" value={activityStats.notes} max={20} color="bg-blue-500" />
+          <ActivityBar label="Flashcards Generated" value={activityStats.flashcards} max={50} color="bg-purple-500" />
+          <ActivityBar label="Quizzes Taken" value={activityStats.quizzes} max={10} color="bg-green-500" />
         </div>
-        <h3 className="font-bold" style={{ color: 'var(--color-text-primary)' }}>Streak Progress</h3>
       </div>
-      <div className="text-center py-4">
-        <div className="text-6xl font-bold mb-2" style={{ color: 'var(--color-accent-blue)' }}>
-          {streak}
-        </div>
-        <p style={{ color: 'var(--color-text-secondary)' }}>Day Streak 🔥</p>
-      </div>
-    </div>
-  )
-}
 
-function AchievementsCard({ achievements }) {
-  return (
-    <div className="rounded-2xl p-6 shadow-lg" style={{
-      backgroundColor: 'var(--color-bg-primary)',
-      borderColor: 'var(--color-border-primary)',
-      borderWidth: '1px'
-    }}>
-      <div className="flex items-center gap-3 mb-4">
-        <div className="bg-gradient-to-br from-yellow-500 to-orange-500 w-10 h-10 rounded-lg flex items-center justify-center">
-          <Award className="text-white" size={20} />
+      {/* Weekly Study Time */}
+      <div className="rounded-xl p-6 shadow-md mb-6" style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        borderColor: 'var(--color-border-primary)',
+        borderWidth: '1px'
+      }}>
+        <div className="flex items-center gap-2 mb-6">
+          <TrendingUp className="text-purple-600" size={24} />
+          <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Weekly Study Time</h3>
         </div>
-        <h3 className="font-bold" style={{ color: 'var(--color-text-primary)' }}>Achievements</h3>
-      </div>
-      <div className="text-center py-4">
-        <div className="text-6xl font-bold mb-2" style={{ color: 'var(--color-accent-blue)' }}>
-          {achievements.length}
-        </div>
-        <p style={{ color: 'var(--color-text-secondary)' }}>Badges Earned 🏆</p>
-      </div>
-    </div>
-  )
-}
-
-function WeeklyChart({ data }) {
-  const maxMinutes = Math.max(...data.map(d => d.minutes), 1)
-
-  return (
-    <div className="rounded-2xl p-6 shadow-lg" style={{
-      backgroundColor: 'var(--color-bg-primary)',
-      borderColor: 'var(--color-border-primary)',
-      borderWidth: '1px'
-    }}>
-      <h3 className="text-xl font-bold mb-6" style={{ color: 'var(--color-text-primary)' }}>
-        Weekly Study Time
-      </h3>
-      <div className="flex items-end justify-between gap-2 h-48">
-        {data.map((day, idx) => (
-          <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-            <div className="w-full bg-gray-200 rounded-t-lg relative" style={{
-              height: `${(day.minutes / maxMinutes) * 100}%`,
-              minHeight: '4px',
-              backgroundColor: 'var(--color-accent-blue)'
-            }}>
-              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-semibold"
-                style={{ color: 'var(--color-text-primary)' }}>
-                {day.minutes}m
+        <div className="flex items-end justify-between gap-4 h-48">
+          {weeklyStudyTime.map((time, i) => (
+            <div key={i} className="flex-1 flex flex-col items-center gap-2">
+              <div className="text-sm font-semibold" style={{ color: 'var(--color-text-secondary)' }}>
+                {time}m
               </div>
-            </div>
-            <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-              {day.day}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function TopicAccuracy({ data }) {
-  return (
-    <div className="rounded-2xl p-6 shadow-lg" style={{
-      backgroundColor: 'var(--color-bg-primary)',
-      borderColor: 'var(--color-border-primary)',
-      borderWidth: '1px'
-    }}>
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-gradient-to-br from-green-500 to-emerald-500 w-10 h-10 rounded-lg flex items-center justify-center">
-          <Target className="text-white" size={20} />
-        </div>
-        <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-          Topic Accuracy
-        </h3>
-      </div>
-      <div className="space-y-4">
-        {data.length === 0 ? (
-          <p style={{ color: 'var(--color-text-secondary)' }}>No data yet. Start learning!</p>
-        ) : (
-          data.map((topic, idx) => (
-            <div key={idx}>
-              <div className="flex justify-between mb-1">
-                <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  {topic.topic}
-                </span>
-                <span className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                  {topic.accuracy}%
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 rounded-t-lg relative" style={{ height: '100%' }}>
                 <div
-                  className="h-2 rounded-full transition-all"
-                  style={{
-                    width: `${topic.accuracy}%`,
-                    backgroundColor: topic.accuracy >= 70 ? '#10b981' : topic.accuracy >= 50 ? '#f59e0b' : '#ef4444'
-                  }}
+                  className="bg-gradient-to-t from-purple-600 to-purple-400 rounded-t-lg absolute bottom-0 w-full transition-all"
+                  style={{ height: `${(time / maxTime) * 100}%` }}
                 />
               </div>
+              <div className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+                {days[i]}
+              </div>
             </div>
-          ))
-        )}
+          ))}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6 mb-6">
+        {/* Streak Progress */}
+        <div className="rounded-xl p-6 shadow-md" style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          borderColor: 'var(--color-border-primary)',
+          borderWidth: '1px'
+        }}>
+          <div className="flex items-center gap-2 mb-6">
+            <Flame className="text-orange-600" size={24} />
+            <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Streak Progress</h3>
+          </div>
+          <div className="text-center">
+            <div className="text-6xl mb-4">🔥</div>
+            <div className="text-4xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>{streak} Days</div>
+            <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Current Streak</div>
+            <div className="mt-4 w-full bg-gray-200 rounded-full h-3">
+              <div
+                className="bg-gradient-to-r from-orange-500 to-red-500 h-3 rounded-full transition-all"
+                style={{ width: `${Math.min((streak / 30) * 100, 100)}%` }}
+              />
+            </div>
+            <div className="text-xs mt-2" style={{ color: 'var(--color-text-secondary)' }}>Goal: 30 days</div>
+          </div>
+        </div>
+
+        {/* Topic Accuracy */}
+        <div className="rounded-xl p-6 shadow-md" style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          borderColor: 'var(--color-border-primary)',
+          borderWidth: '1px'
+        }}>
+          <div className="flex items-center gap-2 mb-6">
+            <Target className="text-green-600" size={24} />
+            <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Topic Accuracy</h3>
+          </div>
+          <div className="space-y-4">
+            {Object.keys(topicAccuracy).length > 0 ? (
+              Object.entries(topicAccuracy).map(([topic, data]) => (
+                <div key={topic}>
+                  <div className="flex justify-between mb-2">
+                    <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{topic}</span>
+                    <span className="text-sm font-bold" style={{ color: data.accuracy >= 70 ? '#10b981' : '#f59e0b' }}>
+                      {data.accuracy}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full ${data.accuracy >= 70 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                      style={{ width: `${data.accuracy}%` }}
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
+                No quiz data yet. Take a quiz to see accuracy!
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Achievements Overview */}
+      <div className="rounded-xl p-6 shadow-md" style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        borderColor: 'var(--color-border-primary)',
+        borderWidth: '1px'
+      }}>
+        <div className="flex items-center gap-2 mb-6">
+          <Award className="text-yellow-600" size={24} />
+          <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>Achievements Overview</h3>
+        </div>
+        <div className="grid md:grid-cols-5 gap-4">
+          {achievements.map((achievement) => (
+            <div
+              key={achievement.id}
+              className={`rounded-xl p-4 text-center transition-all ${achievement.earned ? 'shadow-lg' : 'opacity-50'}`}
+              style={{
+                backgroundColor: achievement.earned ? 'var(--color-bg-tertiary)' : 'var(--color-bg-secondary)',
+                borderColor: 'var(--color-border-primary)',
+                borderWidth: '1px'
+              }}
+            >
+              <div className="text-4xl mb-2">{achievement.icon}</div>
+              <div className="text-xs font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
+                {achievement.name}
+              </div>
+              {!achievement.earned && achievement.target && (
+                <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                  {achievement.progress}/{achievement.target}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
 }
 
-function StatRow({ label, value, color }) {
-  const colors = {
-    blue: '#3b82f6',
-    purple: '#a855f7',
-    green: '#10b981'
-  }
+function ActivityBar({ label, value, max, color }) {
+  const percentage = Math.min((value / max) * 100, 100)
 
   return (
-    <div className="flex justify-between items-center">
-      <span style={{ color: 'var(--color-text-secondary)' }}>{label}</span>
-      <span className="text-2xl font-bold" style={{ color: colors[color] }}>
-        {value}
-      </span>
+    <div>
+      <div className="flex justify-between mb-2">
+        <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>{label}</span>
+        <span className="text-sm font-bold" style={{ color: 'var(--color-text-primary)' }}>{value}</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-8 relative overflow-hidden">
+        <div
+          className={`${color} h-8 rounded-full transition-all flex items-center justify-end pr-3`}
+          style={{ width: `${percentage}%` }}
+        >
+          {percentage > 20 && (
+            <span className="text-white text-xs font-bold">{Math.round(percentage)}%</span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

@@ -5,6 +5,8 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str
     DATABASE_URL: str = "sqlite:///./app.db"
     SECRET_KEY: str
+    SUPABASE_URL: str = ""
+    SUPABASE_KEY: str = ""
     
     class Config:
         env_file = ".env"

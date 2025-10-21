@@ -1,6 +1,7 @@
 import { BookOpen, TrendingUp, Award, Target } from 'lucide-react'
 import useProgressStore from '../../stores/progressStore'
 import useCompetencyStore from '../../stores/competencyStore'
+import ProgressRing from '../gamification/ProgressRing'
 
 export default function ProgressDashboard() {
   const masteryLevels = useProgressStore(state => state.masteryLevels)
@@ -13,38 +14,55 @@ export default function ProgressDashboard() {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
           Your Learning Progress
         </h2>
-        <p className="text-gray-600">Track your mastery across all competencies</p>
+        <p style={{ color: 'var(--color-text-secondary)' }}>Track your mastery across all competencies</p>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
-        <StatCard
-          icon={Target}
-          label="Overall Progress"
-          value={`${overallProgress}%`}
-          gradient="from-blue-500 to-cyan-500"
-        />
-        <StatCard
-          icon={BookOpen}
-          label="Topics Mastered"
-          value={Object.values(masteryLevels).filter(m => m > 0.95).length}
-          gradient="from-green-500 to-emerald-500"
-        />
-        <StatCard
-          icon={TrendingUp}
-          label="In Progress"
-          value={Object.values(masteryLevels).filter(m => m > 0 && m <= 0.95).length}
-          gradient="from-yellow-500 to-orange-500"
-        />
-        <StatCard
-          icon={Award}
-          label="Badges Earned"
-          value={Object.values(masteryLevels).filter(m => m > 0.95).length}
-          gradient="from-purple-500 to-pink-500"
-        />
+      {/* Stats Overview with Progress Rings */}
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="rounded-xl p-6 shadow-md" style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          borderColor: 'var(--color-border-primary)',
+          borderWidth: '1px'
+        }}>
+          <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Overall Progress</h3>
+          <div className="flex justify-around items-center">
+            <ProgressRing 
+              progress={overallProgress} 
+              size={140} 
+              strokeWidth={12}
+              color="#3b82f6"
+              label="Overall"
+            />
+            <div className="space-y-3">
+              <StatItem icon={BookOpen} label="Mastered" value={Object.values(masteryLevels).filter(m => m > 0.95).length} color="text-green-600" />
+              <StatItem icon={TrendingUp} label="In Progress" value={Object.values(masteryLevels).filter(m => m > 0 && m <= 0.95).length} color="text-blue-600" />
+              <StatItem icon={Award} label="Badges" value={Object.values(masteryLevels).filter(m => m > 0.95).length} color="text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl p-6 shadow-md" style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          borderColor: 'var(--color-border-primary)',
+          borderWidth: '1px'
+        }}>
+          <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Top Competencies</h3>
+          <div className="flex justify-around items-center">
+            {competencyGraph.nodes.slice(0, 3).map(node => (
+              <ProgressRing
+                key={node.id}
+                progress={(masteryLevels[node.id] || 0) * 100}
+                size={100}
+                strokeWidth={8}
+                color={(masteryLevels[node.id] || 0) >= 0.95 ? '#10b981' : (masteryLevels[node.id] || 0) >= 0.7 ? '#3b82f6' : '#f59e0b'}
+                label={node.name.split(' ')[0]}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Competency Cards */}
@@ -54,10 +72,14 @@ export default function ProgressDashboard() {
           const percentage = Math.round(mastery * 100)
 
           return (
-            <div key={node.id} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-all">
+            <div key={node.id} className="rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all" style={{
+              backgroundColor: 'var(--color-bg-primary)',
+              borderColor: 'var(--color-border-primary)',
+              borderWidth: '1px'
+            }}>
               <div className="flex justify-between items-start mb-4">
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold mb-1">{node.name}</h3>
+                  <h3 className="text-xl font-bold mb-1" style={{ color: 'var(--color-text-primary)' }}>{node.name}</h3>
                   {node.prerequisites.length > 0 && (
                     <p className="text-sm text-gray-500">
                       Prerequisites: {node.prerequisites.join(', ')}
@@ -111,14 +133,14 @@ export default function ProgressDashboard() {
   )
 }
 
-function StatCard({ icon: Icon, label, value, gradient }) {
+function StatItem({ icon: Icon, label, value, color }) {
   return (
-    <div className="bg-white rounded-xl p-6 shadow-md border border-gray-100">
-      <div className={`bg-gradient-to-br ${gradient} w-12 h-12 rounded-xl flex items-center justify-center mb-3`}>
-        <Icon className="text-white" size={24} />
+    <div className="flex items-center gap-3">
+      <Icon className={color} size={20} />
+      <div>
+        <div className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{value}</div>
+        <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>{label}</div>
       </div>
-      <div className="text-3xl font-bold text-gray-800 mb-1">{value}</div>
-      <div className="text-sm text-gray-600">{label}</div>
     </div>
   )
 }

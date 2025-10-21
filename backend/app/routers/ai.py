@@ -14,7 +14,7 @@ class EnhanceRequest(BaseModel):
     level: str = Field(default="beginner")
 
 class QuestionRequest(BaseModel):
-    question: str = Field(..., min_length=3, max_length=500)
+    question: str = Field(..., min_length=3, max_length=50000)
     contentId: Optional[str] = None
     userId: Optional[str] = None
     chatHistory: Optional[list] = None

@@ -24,25 +24,25 @@ export default function BadgeDisplay() {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="mb-8">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+        <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
           Your Achievements
         </h2>
-        <p className="text-gray-600">Earn badges by mastering competencies</p>
+        <p style={{ color: 'var(--color-text-secondary)' }}>Earn badges by mastering competencies</p>
       </div>
 
       {/* Stats */}
       <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl p-6 text-white shadow-xl">
+        <div className="rounded-2xl p-6 shadow-xl" style={{ backgroundColor: 'var(--color-accent-blue)', color: '#ffffff' }}>
           <Trophy size={40} className="mb-3" />
           <div className="text-4xl font-bold mb-1">{earnedBadges.length}</div>
-          <div className="text-white/90">Badges Earned</div>
+          <div style={{ opacity: 0.9 }}>Badges Earned</div>
         </div>
-        <div className="bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl p-6 text-white shadow-xl">
+        <div className="rounded-2xl p-6 shadow-xl" style={{ backgroundColor: 'var(--color-accent-purple)', color: '#ffffff' }}>
           <Star size={40} className="mb-3" />
           <div className="text-4xl font-bold mb-1">{lockedBadges.length}</div>
-          <div className="text-white/90">To Unlock</div>
+          <div style={{ opacity: 0.9 }}>To Unlock</div>
         </div>
-        <div className="bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl p-6 text-white shadow-xl">
+        <div className="rounded-2xl p-6 shadow-xl" style={{ backgroundColor: 'var(--color-success)', color: '#ffffff' }}>
           <Award size={40} className="mb-3" />
           <div className="text-4xl font-bold mb-1">{Math.round((earnedBadges.length / Object.keys(badges).length) * 100)}%</div>
           <div className="text-white/90">Completion</div>
@@ -52,7 +52,7 @@ export default function BadgeDisplay() {
       {/* Earned Badges */}
       {earnedBadges.length > 0 && (
         <div className="mb-8">
-          <h3 className="text-2xl font-bold mb-4">Earned Badges</h3>
+          <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Earned Badges</h3>
           <div className="grid md:grid-cols-3 gap-6">
             {earnedBadges.map(badge => (
               <div key={badge.id} className={`bg-gradient-to-br ${badge.color} rounded-2xl p-6 text-white shadow-xl hover:scale-105 transition-all`}>
@@ -73,18 +73,24 @@ export default function BadgeDisplay() {
       {/* Locked Badges */}
       {lockedBadges.length > 0 && (
         <div>
-          <h3 className="text-2xl font-bold mb-4">Locked Badges</h3>
+          <h3 className="text-2xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>Locked Badges</h3>
           <div className="grid md:grid-cols-3 gap-6">
             {lockedBadges.map(badge => (
-              <div key={badge.id} className="bg-gray-100 rounded-2xl p-6 border-2 border-gray-200 relative overflow-hidden">
+              <div key={badge.id} className="rounded-2xl p-6 border-2 relative overflow-hidden" style={{
+                backgroundColor: 'var(--color-bg-secondary)',
+                borderColor: 'var(--color-border-primary)'
+              }}>
                 <div className="absolute top-4 right-4">
                   <Lock className="text-gray-400" size={24} />
                 </div>
                 <div className="text-6xl mb-4 text-center opacity-30 grayscale">{badge.icon}</div>
-                <h4 className="text-xl font-bold mb-2 text-center text-gray-600">{badge.name}</h4>
-                <p className="text-gray-500 text-sm text-center">{badge.description}</p>
+                <h4 className="text-xl font-bold mb-2 text-center" style={{ color: 'var(--color-text-secondary)' }}>{badge.name}</h4>
+                <p className="text-sm text-center" style={{ color: 'var(--color-text-tertiary)' }}>{badge.description}</p>
                 <div className="mt-4 text-center">
-                  <span className="inline-block bg-gray-200 px-3 py-1 rounded-full text-xs font-semibold text-gray-600">
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold" style={{
+                    backgroundColor: 'var(--color-bg-tertiary)',
+                    color: 'var(--color-text-secondary)'
+                  }}>
                     Complete {badge.id} to unlock
                   </span>
                 </div>
@@ -97,8 +103,8 @@ export default function BadgeDisplay() {
       {earnedBadges.length === 0 && (
         <div className="text-center py-12">
           <Award className="mx-auto mb-4 text-gray-300" size={80} />
-          <h3 className="text-2xl font-bold text-gray-600 mb-2">No Badges Yet</h3>
-          <p className="text-gray-500">Complete competencies to earn your first badge!</p>
+          <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-secondary)' }}>No Badges Yet</h3>
+          <p style={{ color: 'var(--color-text-tertiary)' }}>Complete competencies to earn your first badge!</p>
         </div>
       )}
     </div>

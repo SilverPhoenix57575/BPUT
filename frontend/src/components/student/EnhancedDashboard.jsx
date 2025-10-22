@@ -520,14 +520,145 @@ function LearningInsights({ stats, analytics }) {
   )
 }
 
-function InsightItem({ icon, label, value, description }) {
+function ContinueLearning({ onNavigate }) {
+  const lastActivity = {
+    type: 'roadmap',
+    title: 'React Learning Path',
+    nextStep: 'Learn useEffect Hook',
+    progress: 65,
+    action: 'career'
+  }
+
+  const getIcon = () => {
+    switch(lastActivity.type) {
+      case 'roadmap': return <Compass size={24} />
+      case 'chat': return <MessageSquare size={24} />
+      case 'reading': return <BookOpen size={24} />
+      default: return <Brain size={24} />
+    }
+  }
+
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-      <div className="text-2xl">{icon}</div>
-      <div className="flex-1">
-        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>{label}</p>
-        <p className="text-lg font-bold" style={{ color: 'var(--color-text-primary)' }}>{value}</p>
-        <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>{description}</p>
+    <div 
+      className="mb-8 p-6 rounded-2xl shadow-lg cursor-pointer transition-all hover:shadow-xl"
+      style={{
+        background: 'linear-gradient(135deg, var(--color-accent-blue) 0%, #7c3aed 100%)',
+        borderWidth: '1px',
+        borderColor: 'var(--color-border-primary)'
+      }}
+      onClick={() => {
+        tracker.trackDashboardClick('continue_learning')
+        onNavigate(lastActivity.action)
+      }}
+    >
+      <div className="flex items-center gap-4">
+        <div className="bg-white/20 p-4 rounded-xl text-white">
+          {getIcon()}
+        </div>
+        <div className="flex-1">
+          <p className="text-sm text-white/80 mb-1">Continue Learning</p>
+          <h3 className="text-2xl font-bold text-white mb-2">{lastActivity.title}</h3>
+          <p className="text-white/90 mb-3">Next up: {lastActivity.nextStep}</p>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 bg-white/20 rounded-full h-2">
+              <div className="h-2 rounded-full bg-white" style={{ width: `${lastActivity.progress}%` }} />
+            </div>
+            <span className="text-sm text-white font-semibold">{lastActivity.progress}%</span>
+          </div>
+        </div>
+        <ArrowRight className="text-white" size={32} />
+      </div>
+    </div>
+  )
+}
+
+function AIRecommendations({ masteryLevels, stats, analytics, onNavigate }) {
+  const topics = Object.entries(masteryLevels || {}).map(([topic, level]) => ({ topic, level }))
+  const weakest = topics.sort((a, b) => a.level - b.level)[0]
+  const strongest = topics.sort((a, b) => b.level - a.level)[0]
+  
+  const timeOfDay = new Date().getHours()
+  const learningTime = timeOfDay < 12 ? 'morning ☀️' : timeOfDay < 18 ? 'afternoon 🌤️' : 'evening 🌙'
+  
+  return (
+    <div 
+      className="rounded-2xl p-6 shadow-lg cursor-pointer transition-all hover:shadow-xl" 
+      style={{
+        backgroundColor: 'var(--color-bg-primary)',
+        borderColor: 'var(--color-border-primary)',
+        borderWidth: '1px'
+      }}
+      onClick={() => tracker.trackDashboardClick('ai_recommendations')}
+    >
+      <div className="flex items-center gap-3 mb-6">
+        <div className="bg-gradient-to-br from-purple-500 to-pink-500 w-12 h-12 rounded-xl flex items-center justify-center">
+          <Brain className="text-white" size={24} />
+        </div>
+        <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>AI Recommendations</h3>
+      </div>
+      
+      <div className="space-y-4">
+        {weakest && weakest.level < 0.7 && (
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🎯</span>
+              <div className="flex-1">
+                <p className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Topics to Review</p>
+                <p className="text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  It looks like you're finding <span className="font-semibold">{weakest.topic}</span> tricky.
+                </p>
+                <button 
+                  className="text-xs px-3 py-1.5 rounded-lg transition-all"
+                  style={{ backgroundColor: 'var(--color-accent-blue)', color: '#ffffff' }}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onNavigate('hub')
+                  }}
+                >
+                  Review this topic →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {strongest && strongest.level >= 0.8 && (
+          <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+            <div className="flex items-start gap-3">
+              <span className="text-2xl">🌟</span>
+              <div className="flex-1">
+                <p className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>You're Excelling!</p>
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                  You've mastered <span className="font-semibold">{strongest.topic}</span>! Ready to try something new?
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">💡</span>
+            <div className="flex-1">
+              <p className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Learning Style Insight</p>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                You learn best in the {learningTime}. Try building a 30-min study habit!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">📈</span>
+            <div className="flex-1">
+              <p className="font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>Your Pattern</p>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                You master topics fastest when you follow notes with a quiz. Keep it up!
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -626,6 +757,25 @@ function CareerCompass({ career, onNavigate }) {
           ))}
         </div>
       </div>
+
+      {career.match < 90 && (
+        <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+          <p className="text-xs mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+            💡 Add <span className="font-semibold">{(career.skills || career.requiredSkills || [])[0]}</span> to your roadmap to boost your match by 15%!
+          </p>
+          <button
+            className="text-xs px-3 py-1.5 rounded-lg transition-all"
+            style={{ backgroundColor: 'var(--color-accent-blue)', color: '#ffffff' }}
+            onClick={(e) => {
+              e.stopPropagation()
+              tracker.trackCareerInteraction('improve_match_clicked', career.title)
+              navigateToCareer()
+            }}
+          >
+            Start Learning →
+          </button>
+        </div>
+      )}
     </div>
   )
 }

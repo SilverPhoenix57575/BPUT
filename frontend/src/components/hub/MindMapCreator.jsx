@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react'
-import { Brain, Plus, Trash2, Save, Sparkles, List, X } from 'lucide-react'
+import { Brain, Plus, Trash2, Save, Sparkles, List, X, Network, LayoutGrid } from 'lucide-react'
 import axios from 'axios'
 import useUserStore from '../../stores/userStore'
+import { KnowledgeGraph } from './graph/KnowledgeGraph'
+import { useGraphStore } from '../../stores/graphStore'
+import { MermaidBlock } from './diagrams/MermaidBlock'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export default function MindMapCreator() {
   const { user } = useUserStore()
+  const { setNodes, setEdges } = useGraphStore()
   const [topic, setTopic] = useState('')
   const [generating, setGenerating] = useState(false)
   const [mindmap, setMindmap] = useState(null)
   const [savedMaps, setSavedMaps] = useState([])
   const [showList, setShowList] = useState(false)
+  const [viewMode, setViewMode] = useState('tree')
 
   useEffect(() => {
     if (user) loadSavedMaps()
@@ -41,6 +46,7 @@ export default function MindMapCreator() {
       
       if (data.success) {
         setMindmap(data.data)
+        convertToGraphNodes(data.data)
         loadSavedMaps()
       } else {
         alert(data.error || 'Failed to generate mind map')
@@ -53,12 +59,54 @@ export default function MindMapCreator() {
     }
   }
 
+  const convertToGraphNodes = (mapData) => {
+    if (!mapData?.data) return
+    const nodes = []
+    const edges = []
+    
+    nodes.push({ id: 'central', label: mapData.data.central, position: { x: 400, y: 50 }, mastered: false, data: {} })
+    
+    mapData.data.branches?.forEach((branch, idx) => {
+      const angle = (idx * 2 * Math.PI) / mapData.data.branches.length
+      const radius = 250
+      const branchId = `branch-${branch.id}`
+      
+      nodes.push({
+        id: branchId,
+        label: branch.label,
+        position: { x: 400 + radius * Math.cos(angle), y: 200 + radius * Math.sin(angle) },
+        mastered: false,
+        data: { description: branch.label }
+      })
+      edges.push({ id: `edge-central-${branchId}`, source: 'central', target: branchId })
+      
+      branch.children?.forEach((child, childIdx) => {
+        const childId = `child-${child.id}`
+        const childAngle = angle + (childIdx - branch.children.length / 2) * 0.3
+        const childRadius = radius + 150
+        
+        nodes.push({
+          id: childId,
+          label: child.label,
+          position: { x: 400 + childRadius * Math.cos(childAngle), y: 200 + childRadius * Math.sin(childAngle) },
+          mastered: false,
+          data: {}
+        })
+        edges.push({ id: `edge-${branchId}-${childId}`, source: branchId, target: childId })
+      })
+    })
+    
+    setNodes(nodes)
+    setEdges(edges)
+  }
+
   const loadMindMap = async (id) => {
     try {
       const { data } = await axios.get(`${API_URL}/api/v1/mindmap/${id}`)
       if (data.success) {
         setMindmap(data.data)
         setTopic(data.data.title)
+        convertToGraphNodes(data.data)
         setShowList(false)
       }
     } catch (error) {
@@ -130,12 +178,22 @@ export default function MindMapCreator() {
           </div>
 
           {mindmap && (
-            <div className="rounded-2xl p-6 shadow-lg" style={{
+            <div className="rounded-2xl shadow-lg" style={{
               backgroundColor: 'var(--color-bg-primary)',
               borderColor: 'var(--color-border-primary)',
               borderWidth: '1px'
             }}>
-              <MindMapVisualization data={mindmap.data} />
+              <div className="flex gap-2 p-4 border-b" style={{ borderColor: 'var(--color-border-primary)' }}>
+                <button onClick={() => setViewMode('tree')} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${viewMode === 'tree' ? 'bg-purple-600 text-white' : 'bg-gray-100'}`} style={viewMode !== 'tree' ? { color: 'var(--color-text-primary)' } : {}}>
+                  <LayoutGrid size={18} /> Tree View
+                </button>
+                <button onClick={() => setViewMode('graph')} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium ${viewMode === 'graph' ? 'bg-purple-600 text-white' : 'bg-gray-100'}`} style={viewMode !== 'graph' ? { color: 'var(--color-text-primary)' } : {}}>
+                  <Network size={18} /> Interactive Graph
+                </button>
+              </div>
+              <div className="p-6">
+                {viewMode === 'tree' ? <MindMapVisualization data={mindmap.data} /> : <div className="h-[600px]"><KnowledgeGraph /></div>}
+              </div>
             </div>
           )}
 

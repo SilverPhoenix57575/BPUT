@@ -526,7 +526,7 @@ function ContinueLearning({ onNavigate }) {
     title: 'React Learning Path',
     nextStep: 'Learn useEffect Hook',
     progress: 65,
-    action: 'career'
+    action: 'hub'
   }
 
   const getIcon = () => {

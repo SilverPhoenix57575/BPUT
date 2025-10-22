@@ -33,9 +33,9 @@ function App() {
     setError('')
     try {
       const response = await axios.post(`${API_URL}/api/auth/login`, credentials)
-      const { token, ...userData } = response.data
+      const { token, userId, role } = response.data.data
       localStorage.setItem('token', token)
-      setUser({ ...userData, email: credentials.email })
+      setUser({ id: userId, email: credentials.email, role })
     } catch (err) {
       setError(err.response?.data?.detail || 'Login failed')
       console.error('Login error:', err)
@@ -49,9 +49,9 @@ function App() {
     setError('')
     try {
       const response = await axios.post(`${API_URL}/api/auth/signup`, userData)
-      const { token, ...userInfo } = response.data
+      const { token, userId, role } = response.data.data
       localStorage.setItem('token', token)
-      setUser({ ...userInfo, email: userData.email, name: userData.name })
+      setUser({ id: userId, email: userData.email, name: userData.name, role })
     } catch (err) {
       setError(err.response?.data?.detail || 'Signup failed')
       console.error('Signup error:', err)

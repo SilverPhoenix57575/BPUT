@@ -19,6 +19,9 @@
 - [Tracking & Analytics](features/TRACKING_ANALYTICS_FEATURE.md)
 - [Notebook & Gamification](features/NOTEBOOK_GAMIFICATION_COMPLETE.md)
 - [Account Settings](features/ACCOUNT_SETTINGS_FEATURE.md)
+- [Career Mapping - Complete](features/CAREER_PAGE_COMPLETE.md) ⭐ NEW
+- [Career Mapping - User Guide](features/CAREER_PAGE_USER_GUIDE.md)
+- [Career Mapping - Developer Guide](features/CAREER_PAGE_DEV_GUIDE.md)
 
 ## 🗄️ Archive (Old/Duplicate Docs)
 - [Archive Folder](archive/) - Contains outdated and duplicate documentation

@@ -1,0 +1,92 @@
+[
+  {
+    "id": "frontend-developer",
+    "title": "Frontend Developer",
+    "description": "Build user-facing web applications with modern frameworks and responsive design",
+    "avgSalary": "$75,000 - $120,000",
+    "growth": "16% (Faster than average)",
+    "requiredSkills": ["HTML", "CSS", "JavaScript", "React", "Git", "Responsive Design", "REST APIs"],
+    "competencies": ["cs_001", "cs_002", "cs_003", "cs_008"]
+  },
+  {
+    "id": "backend-developer",
+    "title": "Backend Developer",
+    "description": "Design and maintain server-side logic, databases, and APIs",
+    "avgSalary": "$85,000 - $140,000",
+    "growth": "22% (Much faster than average)",
+    "requiredSkills": ["Python", "Node.js", "SQL", "REST APIs", "Authentication", "Git", "Docker"],
+    "competencies": ["cs_001", "cs_002", "cs_004", "cs_005", "cs_010"]
+  },
+  {
+    "id": "fullstack-developer",
+    "title": "Full Stack Developer",
+    "description": "Work on both frontend and backend to build complete web applications",
+    "avgSalary": "$90,000 - $150,000",
+    "growth": "22% (Much faster than average)",
+    "requiredSkills": ["JavaScript", "React", "Node.js", "SQL", "Git", "REST APIs", "Docker", "AWS"],
+    "competencies": ["cs_001", "cs_002", "cs_003", "cs_004", "cs_005", "cs_008", "cs_010"]
+  },
+  {
+    "id": "data-scientist",
+    "title": "Data Scientist",
+    "description": "Analyze complex data to drive business decisions using ML and statistics",
+    "avgSalary": "$100,000 - $160,000",
+    "growth": "36% (Much faster than average)",
+    "requiredSkills": ["Python", "R", "SQL", "Machine Learning", "Statistics", "Data Visualization", "Pandas"],
+    "competencies": ["cs_001", "cs_005", "cs_012", "cs_018"]
+  },
+  {
+    "id": "devops-engineer",
+    "title": "DevOps Engineer",
+    "description": "Automate deployment pipelines and manage cloud infrastructure",
+    "avgSalary": "$95,000 - $145,000",
+    "growth": "20% (Much faster than average)",
+    "requiredSkills": ["Linux", "Docker", "Kubernetes", "CI/CD", "AWS", "Git", "Python", "Terraform"],
+    "competencies": ["cs_001", "cs_002", "cs_010", "cs_015"]
+  },
+  {
+    "id": "mobile-developer",
+    "title": "Mobile Developer",
+    "description": "Create native or cross-platform mobile applications for iOS and Android",
+    "avgSalary": "$80,000 - $135,000",
+    "growth": "19% (Much faster than average)",
+    "requiredSkills": ["React Native", "Flutter", "Swift", "Kotlin", "REST APIs", "Git", "Mobile UI/UX"],
+    "competencies": ["cs_001", "cs_002", "cs_003", "cs_008"]
+  },
+  {
+    "id": "ml-engineer",
+    "title": "Machine Learning Engineer",
+    "description": "Build and deploy ML models to solve real-world problems",
+    "avgSalary": "$110,000 - $180,000",
+    "growth": "40% (Much faster than average)",
+    "requiredSkills": ["Python", "TensorFlow", "PyTorch", "ML Algorithms", "Deep Learning", "SQL", "Docker"],
+    "competencies": ["cs_001", "cs_005", "cs_012", "cs_018"]
+  },
+  {
+    "id": "cloud-architect",
+    "title": "Cloud Architect",
+    "description": "Design scalable cloud infrastructure and migration strategies",
+    "avgSalary": "$120,000 - $190,000",
+    "growth": "25% (Much faster than average)",
+    "requiredSkills": ["AWS", "Azure", "GCP", "Kubernetes", "Terraform", "Networking", "Security"],
+    "competencies": ["cs_001", "cs_010", "cs_015", "cs_016"]
+  },
+  {
+    "id": "cybersecurity-analyst",
+    "title": "Cybersecurity Analyst",
+    "description": "Protect systems and networks from security threats and vulnerabilities",
+    "avgSalary": "$85,000 - $140,000",
+    "growth": "35% (Much faster than average)",
+    "requiredSkills": ["Network Security", "Penetration Testing", "SIEM", "Cryptography", "Linux", "Python"],
+    "competencies": ["cs_001", "cs_016", "cs_017"]
+  },
+  {
+    "id": "ui-ux-designer",
+    "title": "UI/UX Designer",
+    "description": "Design intuitive and beautiful user interfaces and experiences",
+    "avgSalary": "$70,000 - $115,000",
+    "growth": "13% (Faster than average)",
+    "requiredSkills": ["Figma", "Adobe XD", "User Research", "Prototyping", "HTML/CSS", "Design Systems"],
+    "competencies": ["cs_008", "cs_003"]
+  }
+]

@@ -5,6 +5,8 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { aiAPI } from '../../services/api'
 import useUserStore from '../../stores/userStore'
 import ProjectModal from './ProjectModal'
+import { CognitiveMonitor } from '../cognitive/CognitiveMonitor'
+import { useTextFriction } from '../../hooks/useTextFriction'
 
 export default function AIChat() {
   const [chatSessions, setChatSessions] = useState([])
@@ -13,6 +15,7 @@ export default function AIChat() {
     { role: 'assistant', content: 'Hi! I\'m your AI learning assistant. Ask me anything!' }
   ])
   const [question, setQuestion] = useState('')
+  const { reset: resetFriction } = useTextFriction(question)
   const [loading, setLoading] = useState(false)
   const [responseType, setResponseType] = useState('medium')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -188,6 +191,7 @@ export default function AIChat() {
     setMessages(prev => [...prev, userMsg])
     const currentQuestion = question
     setQuestion('')
+    resetFriction()
     setLoading(true)
 
     try {
@@ -221,9 +225,9 @@ export default function AIChat() {
   })
 
   return (
-    <div className="flex h-[calc(100vh-120px)] gap-4 px-6">
+    <div className="grid grid-cols-12 h-[calc(100vh-120px)] gap-4 px-6">
       {!sidebarCollapsed && (
-      <div className="w-72 flex-shrink-0 rounded-2xl shadow-lg p-4" style={{
+      <div className="col-span-2 rounded-2xl shadow-lg p-4" style={{
         backgroundColor: 'var(--color-bg-primary)',
         borderColor: 'var(--color-border-primary)',
         borderWidth: '1px'
@@ -273,25 +277,25 @@ export default function AIChat() {
         <div className="flex gap-1 mb-4">
           <button
             onClick={() => setActiveView('chats')}
-            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg transition-all font-medium text-xs"
+            className="flex-1 flex items-center justify-center gap-1 px-1 py-2 rounded-lg transition-all font-medium text-[11px]"
             style={{
               backgroundColor: activeView === 'chats' ? 'var(--color-bg-tertiary)' : 'transparent',
               color: 'var(--color-text-primary)'
             }}
           >
-            <MessageSquare size={14} />
-            <span>Chats</span>
+            <MessageSquare size={13} className="flex-shrink-0" />
+            <span className="truncate">Chats</span>
           </button>
           <button
             onClick={() => setActiveView('library')}
-            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg transition-all font-medium text-xs"
+            className="flex-1 flex items-center justify-center gap-1 px-1 py-2 rounded-lg transition-all font-medium text-[11px]"
             style={{
               backgroundColor: activeView === 'library' ? 'var(--color-bg-tertiary)' : 'transparent',
               color: 'var(--color-text-primary)'
             }}
           >
-            <BookMarked size={14} />
-            <span>Library</span>
+            <BookMarked size={13} className="flex-shrink-0" />
+            <span className="truncate">Library</span>
           </button>
           <button
             onClick={() => {
@@ -301,14 +305,14 @@ export default function AIChat() {
                 setActiveView('projects')
               }
             }}
-            className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg transition-all font-medium text-xs"
+            className="flex-1 flex items-center justify-center gap-1 px-1 py-2 rounded-lg transition-all font-medium text-[11px]"
             style={{
               backgroundColor: activeView === 'projects' ? 'var(--color-bg-tertiary)' : 'transparent',
               color: 'var(--color-text-primary)'
             }}
           >
-            <FolderOpen size={14} />
-            <span>Projects</span>
+            <FolderOpen size={13} className="flex-shrink-0" />
+            <span className="truncate">Projects</span>
           </button>
         </div>
 
@@ -478,7 +482,7 @@ export default function AIChat() {
         </button>
       )}
 
-      <div className="flex-1 flex flex-col">
+      <div className="col-span-7 flex flex-col">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {activeProject && (
@@ -616,6 +620,11 @@ export default function AIChat() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Cognitive Monitor */}
+      <div className="col-span-3">
+        <CognitiveMonitor />
       </div>
 
       {showProjectModal && (

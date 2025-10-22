@@ -5,9 +5,12 @@ import useUserStore from '../../stores/userStore'
 import useContentStore from '../../stores/contentStore'
 import storage from '../../services/pouchdb'
 import MessageRenderer from './MessageRenderer'
+import { CognitiveMonitor } from '../cognitive/CognitiveMonitor'
+import { useTextFriction } from '../../hooks/useTextFriction'
 
 export default function LearningInterface({ content }) {
   const [question, setQuestion] = useState('')
+  useTextFriction(question)
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Hi! I\'m your AI learning assistant. Ask me anything about your content!' }
   ])
@@ -230,9 +233,9 @@ export default function LearningInterface({ content }) {
         <p style={{ color: 'var(--color-text-secondary)' }}>Ask questions and get instant, source-grounded answers</p>
       </div>
 
-      <div className="flex gap-4">
+      <div className="grid grid-cols-12 gap-4">
         {/* Content Panel - Collapsible */}
-        <div 
+        <div className="col-span-3" 
           className="rounded-lg shadow relative"
           style={{
             backgroundColor: 'var(--color-bg-primary)',
@@ -310,7 +313,7 @@ export default function LearningInterface({ content }) {
         </div>
 
         {/* Chat Panel */}
-        <div className="flex-1 rounded-lg shadow p-6 flex flex-col" style={{
+        <div className="col-span-6 rounded-lg shadow p-6 flex flex-col" style={{
           backgroundColor: 'var(--color-bg-primary)',
           borderColor: 'var(--color-border-primary)',
           borderWidth: '1px'
@@ -384,6 +387,11 @@ export default function LearningInterface({ content }) {
               <Send size={20} />
             </button>
           </div>
+        </div>
+
+        {/* Cognitive Monitor Panel */}
+        <div className="col-span-3">
+          <CognitiveMonitor />
         </div>
       </div>
 

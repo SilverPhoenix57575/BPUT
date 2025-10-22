@@ -90,7 +90,7 @@ function App() {
       case 'career':
         return <CareerMapping />
       default:
-        return <EnhancedDashboard />
+        return <EnhancedDashboard onNavigate={setActiveView} />
     }
   }
 

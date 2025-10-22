@@ -1,9 +1,8 @@
 const CACHE_NAME = 'ai-learning-platform-v1'
+// Only cache static assets that actually exist
 const urlsToCache = [
   '/',
-  '/index.html',
-  '/src/main.jsx',
-  '/src/index.css'
+  '/index.html'
 ]
 
 self.addEventListener('install', event => {

@@ -14,7 +14,16 @@ const useUserStore = create(
       }
     }),
     {
-      name: 'user-storage'
+      name: 'user-storage',
+      // Add error handling for corrupted storage
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('Failed to rehydrate user store:', error)
+          // Clear corrupted storage
+          localStorage.removeItem('user-storage')
+          console.log('Cleared corrupted user storage')
+        }
+      }
     }
   )
 )
